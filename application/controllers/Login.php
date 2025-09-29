@@ -1,0 +1,83 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Login extends CI_Controller {
+	function __construct()
+    {
+        parent::__construct();
+        
+        $this->load->model('Login_model', 'Login');
+    }
+	public function index()
+	{	
+		$data['page_name'] = "index";
+		$this->load->view('Backend/Templates/Login',$data);
+	}
+
+	//Ajax login function 
+    function login()
+    {        
+        $email = $this->input->post("email");
+        $password = $this->input->post("password");
+        
+        $login_status = $this->validate_login($email, $password);
+		        
+        if ($login_status) 
+        {
+			redirect(BASE_URL . 'dashboard', 'refresh');            
+        }else{
+			redirect(BASE_URL, 'refresh');
+		}        
+    }
+
+    //Validating login from ajax request
+    function validate_login($email = NULL, $password = NULL)
+    {           
+        $user_detail = $this->Login->get_user_login(array('email' => $email,'result_type'=>'row'));
+        
+		if ($user_detail->action == 1)
+        { //Kundan@2020!
+            $hashed_password = $user_detail->password;
+            if(hash_equals($hashed_password, crypt($password, $hashed_password))){ 
+                $this->load->model('Settings_model','Settings');
+				$this->session->set_userdata('is_loggedin', '1');
+                $this->session->set_userdata('user_detail', $user_detail);
+                
+                $main_branch_detail = $this->Settings->list_branches(array('client_id'=>$user_detail->client_id,'main_branch'=>'1','result_type'=>'row'));                
+                $this->session->set_userdata('main_branch_detail', $main_branch_detail);
+                $this->session->set_userdata('branch_id', $main_branch_detail->branch_id);               
+                
+                $store_detail = $this->Settings->list_store(array('branch_id'=>$main_branch_detail->branch_id,'result_type'=>'row')); 
+                $this->session->set_userdata('store_id', $store_detail->store_id);
+
+				return true;                
+            }else {				
+				$this->session->set_flashdata('error_message', 'Email or Password is incorrect');
+				return false;
+                 
+            }
+        }else {
+			$this->session->set_flashdata('error_message', 'Invalid login credential');
+			return false;
+        }
+		exit;
+		return false;
+    }
+
+	public function forget_password()
+	{
+		$data['page_name'] = "forget-password";
+		$this->load->view('Backend/Templates/Login',$data);
+	}
+
+	public function reset_password()
+	{
+		$data['page_name'] = "reset-password";
+		$this->load->view('Backend/Templates/Login',$data);
+	}
+
+	function logout() {		
+        $this->session->sess_destroy();        
+        redirect(BASE_URL.'login', 'refresh');
+    }
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+		<link rel="icon" href="<?php echo IMAGE_PATH.'favicon.ico';?>" type="image/x-icon"/>
+		<title><?php echo (isset($page_title) ? UCWORDS(str_replace('-',' ',$page_title)) : UCWORDS(str_replace('-',' ',$this->page_name))). ' :: '.$this->user_detail->client_name; ?></title>		
+		<link id="style" href="<?php echo PLUGINS_PATH.'bootstrap/css/bootstrap.min.css'?>" rel="stylesheet">		
+				
+		<link href="<?php echo CSS_PATH.'icons.css'?>" rel="stylesheet">		
+		<link href="<?php echo CSS_PATH.'style.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'skins.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'dark-style.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'transparent-style.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'boxed.css'?>" rel="stylesheet">
+
+		<!-- Switcher css -->
+		<link href="<?php //echo PLUGINS_PATH.'switcher/css/switcher.css'?>" rel="stylesheet">
+		<link href="<?php //echo PLUGINS_PATH.'switcher/demo.css'?>" rel="stylesheet">
+		<!-- Jquery js-->
+		<script src="<?php echo PLUGINS_PATH.'jquery/jquery.min.js'?>"></script>
+		
+	</head>	
+<body class="main-body ltr">
+<script>
+	var base_url = '<?php echo BASE_URL ?>';
+</script>

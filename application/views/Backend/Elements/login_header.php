@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>		
+		<!-- Favicon -->
+		<link rel="icon" href="<?php echo IMAGE_PATH.'favicon.ico';?>" type="image/x-icon"/>
+		<!-- Title -->
+		<title><?php echo COMPANY_NAME; ?></title>
+		<!---bootstrap css-->
+		<link id="style" href="<?php echo PLUGINS_PATH.'bootstrap/css/bootstrap.min.css'?>" rel="stylesheet">
+		<!---Falg-icons css-->
+		<link href="<?php echo PLUGINS_PATH.'flag-icon-css/css/flag-icon.min.css'?>" rel="stylesheet">
+		<!--- FONT-ICONS CSS -->
+		<link href="<?php echo CSS_PATH.'icons.css'?>" rel="stylesheet">
+		<!---Style css-->
+		<link href="<?php echo CSS_PATH.'style.css'?>" rel="stylesheet">
+		<!--link href="<?php echo CSS_PATH.'skins.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'dark-style.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'transparent-style.css'?>" rel="stylesheet">
+		<link href="<?php echo CSS_PATH.'boxed.css'?>" rel="stylesheet" -->
+
+		<!-- Switcher css -->
+		<!--link href="<?php echo PLUGINS_PATH.'switcher/css/switcher.css'?>" rel="stylesheet">
+		<link href="<?php echo PLUGINS_PATH.'switcher/demo.css'?>" rel="stylesheet" -->
+	</head>
+	<body class="main-body ltr login-img">

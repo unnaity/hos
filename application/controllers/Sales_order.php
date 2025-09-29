@@ -1,0 +1,236 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Sales_order extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        if ($this->session->userdata('is_loggedin') != 1)
+            redirect(BASE_URL . 'login', 'refresh');
+
+        $this->load->model('Sales_order_model', 'Sales_order');
+        $this->load->model('Stocks_model', 'Stocks');
+    }
+
+    public function index($method)
+    {
+        $this->class_name = $this->router->fetch_class();
+        $this->page_name = $method;
+        $this->user_detail = $this->session->userdata('user_detail');
+        $this->branch_id = $this->session->userdata('branch_id');
+        $this->store_id = $this->session->userdata('store_id');
+        $this->result_type = 'row';
+        $this->user_id = $this->user_detail->user_id;
+        $this->client_id = $this->user_detail->client_id;
+        $this->data = [];
+        $this->sales_order_id = $this->uri->segment(2);
+
+        switch ($method) {
+            case 'sales-order-list':
+                $this->sales_order_list();
+                break;
+            case 'create-sales-order':
+                $this->create_sales_order();
+                break;
+            case 'sales-order':
+                $this->sales_order_detail($this->sales_order_id);
+                break;
+            case 'sales-order-edit':
+                $this->sales_order_edit($this->sales_order_id);
+                break;
+            case 'get-product-qty':
+                $this->get_product_qty();
+                exit;
+                break;
+            default:
+                break;
+        };
+        $this->load->view('Backend/' . $this->class_name . '/index', $this->data);
+    }
+
+    function create_sales_order()
+    {
+        $cond = array('store_id' => $this->store_id);
+        if (CURRENT_MONTH < 4) {
+            $this->sales_order_no = (date('y') - 1) . '-' . date('y') . '/#' . str_pad(get_last_id('sales_order_id', 'tbl_sales_order', $cond), 4, "0", STR_PAD_LEFT);
+        } else {
+            $this->sales_order_no = (date('y')) . '-' . (date('y') + 1) . '/#' . str_pad(get_last_id('sales_order_id', 'tbl_sales_order', $cond), 4, "0", STR_PAD_LEFT);
+        }
+        $sales_order_stock = $this->Stocks->product_stock(array('store_id' => $this->store_id));
+        // print_r($sales_order_stock);
+
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('customer_id', 'Customer id', 'trim|required');
+            $this->form_validation->set_rules('purchase_order_id', 'Customer id', 'trim');
+            $this->form_validation->set_rules('product_id_array[]', 'Product id', 'trim|required');
+            $this->form_validation->set_rules('category_id_array[]', 'Category', 'trim|required');
+            $this->form_validation->set_rules('quantity_array[]', 'Quantity', 'trim|required');
+            $this->form_validation->set_rules('sales_type_id', 'Sales type id', 'required');
+
+
+            if ($this->form_validation->run()) {
+
+                $purchase_order_id = $this->input->post('purchase_order_id');
+                $po_date = $this->input->post('po_date');
+                $sales_type_id = $this->input->post('sales_type_id');
+                $customer_id = $this->input->post('customer_id');
+                $order_date = $this->input->post('order_date');
+                $delivery_date = $this->input->post('delivery_date');
+                $category_id_array = $this->input->post('category_id_array');
+                $product_id_array = $this->input->post('product_id_array');
+                $product_alias = $this->input->post('product_alias');
+                $quantity_array = $this->input->post('quantity_array');
+                $price_array = $this->input->post('price_array');
+                //$unit_id_array = $this->input->post('unit_id_array');
+                $additional_info = $this->input->post('additional_info');
+
+                if (!empty($po_date)) {
+                    $po_date = date('Y-m-d', strtotime($po_date));
+                } else {
+                    $po_date = date('Y-m-d');
+                }
+
+                if (!empty($order_date)) {
+                    $order_date = date('Y-m-d', strtotime($order_date));
+                } else {
+                    $order_date = date('Y-m-d');
+                }
+
+                if (!empty($delivery_date)) {
+                    $delivery_date = date('Y-m-d', strtotime($delivery_date));
+                } else {
+                    $delivery_date = date('Y-m-d');
+                }
+
+                $sales_order = $this->Sales_order->add_sales_order(
+                    array(
+                        'store_id' => $this->store_id,
+                        'sales_order_no' => $this->sales_order_no,
+                        'purchase_order_id' => $purchase_order_id,
+                        'sales_type_id' => $sales_type_id,
+                        'po_date' => $po_date,
+                        'customer_id' => $customer_id,
+                        'order_date' => $order_date,
+                        'delivery_date' => $delivery_date,
+                        'created_by' => $this->user_id,
+                        'additional_info' => $additional_info,
+                        'result_type' => $this->result_type
+                    )
+                );
+                if ($sales_order->action == 1) {
+                    $sales_order_id = $sales_order->sales_order_id;
+
+                    for ($i = 0; $i < count($product_id_array); $i++) {
+                        $sales_order_detail = $this->Sales_order->add_sales_order_detail(
+                            array(
+                                'sales_order_id' => $sales_order_id,
+                                'category_id' => $category_id_array[$i],
+                                'product_id' => $product_id_array[$i],
+                                'product_alias' => $product_alias,
+                                'quantity' => $quantity_array[$i],
+                                'price' => $price_array[$i],
+                                'created_by' => $this->user_id,
+                                'result_type' => $this->result_type
+                            )
+                        );
+                        //echo $this->db->last_query();exit;
+                        //pr($sales_order_detail);exit;
+                    }
+                    $this->session->set_flashdata('success_message', $sales_order->message);
+                } else if ($sales_order->action == 0) {
+                    $this->session->set_flashdata('error_message', $sales_order->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+            }
+            redirect(BASE_URL . $this->page_name, 'refresh');
+        }
+        $this->data['sales_type'] = $this->Common_model->getAll('tbl_sales_type', array('status' => '1'));
+        $this->category_option = $this->Options->category_option();
+        $this->customer_option = $this->Options->customer_option();
+        $this->uom_option = $this->Options->uom_option();
+    }
+
+    public function sales_order_list()
+    {
+        $this->sales_order_list = $this->Sales_order->list_sales_order(array('store_id' => $this->store_id));
+        $this->customer_option = $this->Options->customer_option();
+    }
+
+    public function sales_order_detail($sales_order_id)
+    {
+        $this->client_detail = get_client_list($this->client_id);
+        $this->sales_order = $this->Sales_order->list_sales_order(array('store_id' => $this->store_id, 'sales_order_id' => $sales_order_id, 'result_type' => $this->result_type));
+        $this->sales_order_product = $this->Sales_order->sales_order_detail(array('store_id' => $this->store_id, 'sales_order_id' => $sales_order_id));
+    }
+    public function sales_order_edit($sales_order_id)
+    {   
+    if ($this->input->post()) {
+        $this->form_validation->set_rules('customer_id', 'Customer id', 'trim|required');
+        $this->form_validation->set_rules('purchase_order_id', 'Customer id', 'trim');
+        $this->form_validation->set_rules('product_id_array[]', 'Product id', 'trim|required');
+        $this->form_validation->set_rules('category_id_array[]', 'Category', 'trim|required');
+        $this->form_validation->set_rules('quantity_array[]', 'Quantity', 'trim|required');
+        $this->form_validation->set_rules('sales_type_id', 'Sales type id', 'trim|required');
+        $this->form_validation->set_rules('sales_order_id', 'Sales Order id', 'trim|required');
+        $this->form_validation->set_rules('sales_order_detail_id', 'Sales Order Detail id', 'trim|required');
+        $this->form_validation->set_rules('sales_order_no', 'Sales Order no', 'trim|required');
+
+        if ($this->form_validation->run()) {
+            $customer_id = $this->input->post('customer_id');
+            $category_id_array = $this->input->post('category_id_array');
+            $product_id_array = $this->input->post('product_id_array');
+            $product_alias = $this->input->post('product_alias_name_array');
+            $quantity_array = $this->input->post('quantity_array');
+            $sales_order_id = $this->input->post('sales_order_id');
+            $sales_order_detail_id = $this->input->post('sales_order_detail_id');
+            $additional_info = $this->input->post('additional_info');
+            $sales_order_no = $this->input->post('sales_order_no');
+
+            $delete_sales_order = $this->Sales_order->delete_sales_order_detail(array('sales_order_id' => $sales_order_id));
+
+            for ($i = 0; $i < count($product_id_array); $i++) {
+                $sales_order_detail = $this->Sales_order->add_sales_order_detail(
+                    array(
+                        'sales_order_id' => $sales_order_id,
+                        'category_id' => $category_id_array[$i],
+                        'sales_order_detail_id' => $sales_order_detail_id,
+                        'sales_order_no' => $sales_order_no,
+                        'product_id' => $product_id_array[$i],
+                        'product_alias' => $product_alias[$i],
+                        'quantity' => $quantity_array[$i],
+                        'created_by' => $this->user_id,
+                        'result_type' => $this->result_type
+                    )
+                );
+            }
+            $this->session->set_flashdata('success_message', 'Sales Order updated successfully!');
+        }
+        redirect(BASE_URL . $this->page_name, 'refresh');
+    }
+    $this->sales_order_list = $this->Sales_order->list_sales_order(array('store_id' => $this->store_id, 'sales_order_id' => $sales_order_id, 'result_type' => $this->result_type));
+    $customer_id = $this->sales_order_list->customer_id;
+    //pr($this->sales_order_list);exit;
+    $this->sales_order_product = $this->Sales_order->sales_order_detail(array('store_id' => $this->store_id, 'sales_order_id' => $sales_order_id));
+
+    $this->data['sales_type'] = $this->Common_model->getAll('tbl_sales_type', array('status' => '1'));
+    $this->category_option = $this->Options->category_option(array());
+    $this->customer_option = $this->Options->customer_option(['selected_value' => $customer_id]);
+    $this->uom_option = $this->Options->uom_option();
+    }
+
+    function get_product_qty()
+    {
+        $product_id = $this->input->post('product_id');
+        $quantity = $this->input->post('quantity');
+        $sales_order_stock = $this->Stocks->product_stock(array('store_id' => $this->store_id, 'product_id' => $product_id, 'result_type' => $this->result_type));
+        //print_r($sales_order_stock);
+        if (!empty($sales_order_stock)) {
+            $data = array('message' => '', 'status' => 1, 'total_item' => $sales_order_stock->total_item);
+        } else {
+            $data = array('message' => '', 'status' => 0, 'total_item' => 0);
+        }
+        echo json_encode($data);
+    }
+}

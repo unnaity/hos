@@ -1,0 +1,99 @@
+<?php $branch_id = $this->session->userdata('branch_id');
+$store_id = $this->session->userdata('store_id');
+?>
+<!-- Page -->
+<div class="page">
+	<!-- Main Header-->
+	<div class="main-header sticky">
+		<div class="container-fluid main-container">
+			<!--div class="main-header-left sidemenu">
+				<a class="main-header-menu-icon" href="" id="mainSidebarToggle"><span></span></a>
+			</div-->
+			<div class="main-header-left horizontal2">
+				<a class="main-logo" href="#">
+                    <img src="<?php echo IMAGE_PATH.'logo.png';?>" class="header-brand-img" alt="<?php echo COMPANY_NAME; ?>">					
+				</a>
+				<button class="navbar-toggler navresponsive-toggler d-lg-none ms-auto collapsed" type="button"
+					data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-5"
+					aria-controls="navbarSupportedContent-5" aria-expanded="false"
+					aria-label="Toggle navigation"> 
+					<span class="navbar-toggler-icon">
+						<div class="main-header-left sidemenu">
+							<a class="main-header-menu-icon" href="#" ><span></span></a>
+						</div>
+					</span>
+				</button>
+			</div>
+
+			
+			
+			<div class="main-header-right">
+				<button class="navbar-toggler navresponsive-toggler d-lg-none ms-auto collapsed" type="button"
+					data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4"
+					aria-controls="navbarSupportedContent-4" aria-expanded="false"
+					aria-label="Toggle navigation"> <span class="navbar-toggler-icon fe fe-more-vertical"></span>
+				</button>
+				<div class="navbar navbar-expand-lg navbar-collapse responsive-navbar p-0">
+					<div class="collapse navbar-collapse" id="navbarSupportedContent-4">
+						<ul class="nav nav-item header-icons navbar-nav-right ms-auto">							
+							<li class="dropdown">Branch : &nbsp;</li>
+							<li class="dropdown" style="padding-right:30px;">
+								<select class="" name="branch_id" required style="border: unset;background: none;" onchange="change_branch(this.value);">
+									<?php echo getAllBranch($branch_id); ?>
+								</select>
+							</li>
+
+							<li class="dropdown">Warehouse : &nbsp;</li>
+							<li class="dropdown">
+								<select class="" name="store_id" required style="border: unset;background: none;" onchange="change_store(this.value);">
+									<?php echo getAllStore($branch_id,$store_id); ?>
+								</select>
+							</li>
+							<li class="dropdown">
+								<a class="nav-link icon full-screen-link">
+									<!-- i class="fe fe-maximize fullscreen-button"></i-->
+								</a>
+							</li>
+							
+							<li class="dropdown main-profile-menu">
+								<a class="main-img-user nav-link icon" href=""><i class="fe fe-user"></i></a>
+								<div class="dropdown-menu">
+									<a class="dropdown-item border-top text-wrap" href="#">
+										<i class="fe fe-user"></i> My Profile
+									</a>
+									
+									<a class="dropdown-item text-wrap" href="<?php echo BASE_URL.'general'?>">
+										<i class="fe fe-settings"></i> Settings
+									</a>
+									
+									<a class="dropdown-item text-wrap" href="<?php echo BASE_URL.'logout'?>">
+										<i class="fe fe-power"></i> Sign Out
+									</a>
+								</div>
+							</li>							
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>		
+	</div>
+
+	
+			
+	
+	<!-- End Main Header-->	
+	<div class="modal fade" id="confirm-modal">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content tx-size-sm">
+				<div class="modal-body tx-center pd-y-20 pd-x-20">					
+					<h4 class="tx-danger mg-b-20">Do you want to Delete the Record?</h4>
+					<!-- p class="mg-b-20 mg-x-20">Once record is deleted, can't retrieve again</p-->					
+					<a href="#" id="delete_link">
+						<button aria-label="Close"class="btn ripple mb-2 me-2 btn-danger" type="button">Delete</button>
+					</a>
+					<button aria-label="Close" class="btn btn-info mb-2 me-2" data-bs-dismiss="modal" type="button">Cancel</button>					
+				</div>
+			</div>
+		</div>
+	</div>
+	

@@ -1,0 +1,37 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Employee_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+
+	function add_employee($input){		
+		$employee_name = $input['employee_name'] ?? 'NULL';
+		$employee_dob = !empty($input['employee_dob']) ? $input['employee_dob'] : 'NULL';
+		$employee_gender = $input['employee_gender'] ?? 'NULL';
+		$employee_address = $input['employee_address'] ?? 'NULL';
+		$mobile_no = $input['mobile_no'] ?? 0;
+		$email = $input['email'] ?? 'NULL';
+		$store_id = $input['store_id'] ?? 0;
+		$employee_designation = $input['employee_designation'] ?? 'NULL';
+		$department_id = !empty($input['department_id']) ? $input['department_id'] : 0;
+		$created_by = $input['created_by'] ?? 0;
+		
+		$employee_list = $this->Common_model->callSP("SAVE_EMPLOYEE(".$department_id.",".$store_id.",'".$employee_name."','".$email."','".$mobile_no."','".$employee_gender."','".$employee_address."','".$employee_designation."',".$employee_dob.",".$created_by.")","row");
+		return $employee_list;
+	}
+
+	function list_employee($input){
+		$employee_id = $input['employee_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+        $department_id = $input['department_id'] ?? 0;
+		$employee_name = $input['employee_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$employee_list = $this->Common_model->callSP("GET_EMPLOYEE_LIST(".$employee_id.",".$store_id.",".$department_id.",".$employee_name.")",$result_type);
+		return $employee_list;
+	}
+
+}
+

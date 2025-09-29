@@ -1,0 +1,13 @@
+<?php 
+$no_load = ['show-input-box'];
+if(!in_array($this->page_name,$no_load)){
+    $this->load->view('Backend/Elements/head-tag.php');
+    $this->load->view('Backend/Elements/loader.php');
+    $this->load->view('Backend/Elements/header.php');
+    $this->load->view('Backend/Elements/left-menu.php');
+    $this->load->view('Backend/'.$this->class_name.'/'.$this->page_name.'.php');
+    $this->load->view('Backend/Elements/footer.php');
+}else{
+    $this->load->view('Backend/'.$this->class_name.'/'.$this->page_name.'.php');
+}
+?>

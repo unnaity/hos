@@ -1,0 +1,138 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Suppliers extends CI_Controller {
+	function __construct()
+    {
+        parent::__construct();
+        if ($this->session->userdata('is_loggedin') != 1)
+            redirect(BASE_URL . 'login', 'refresh');
+        
+        $this->load->model('Suppliers_model','Suppliers');
+        $this->user_detail = $this->session->userdata('user_detail');
+    }
+    
+	public function index($method)
+	{	 
+        $this->class_name = $this->router->fetch_class();
+        $this->page_name = $method;
+        $this->data = [];
+
+        switch ($method) {
+            case 'supplier-list':
+                $this->supplier_list();
+                break;
+            case 'add-supplier':
+                $this->add_supplier();
+                break;
+            case 'oem-list':
+                $this->oem_list();
+                break;
+            case 'add-oem':
+                $this->add_oem();
+                break;    
+            default:
+                //--- 
+                break;
+        };
+        $this->load->view('Backend/'.$this->class_name.'/index');        
+	}
+
+    public function supplier_list()
+	{           
+        $this->supplier_list = $this->Suppliers->list_supplier(array('is_oem'=>'0'));
+	}
+
+    public function add_supplier()
+	{	        
+        if($this->input->post()){
+            $this->form_validation->set_rules('company_name', 'Company name', 'trim|required');           
+            $this->form_validation->set_rules('mobile_no', 'contact no.', 'trim|required|numeric|exact_length[10]');
+            $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');
+            $this->form_validation->set_rules('address', 'Address', 'trim');
+            $this->form_validation->set_rules('additional_info', 'Additional Info', 'trim');
+            if ($this->form_validation->run()){
+                $input['supplier_id'] = 0; 
+                $input['company_name'] = $this->input->post('company_name');
+                $input['email'] = $this->input->post('email');
+                $input['mobile_no'] = $this->input->post('mobile_no');
+                $input['address'] = $this->input->post('address');		
+                $input['additional_info'] = $this->input->post('additional_info');
+                $input['gst_no'] = $this->input->post('gst_no');
+                $input['pan_no'] = $this->input->post('pan_no');
+                $input['created_by'] = $this->user_detail->user_id;
+                $input['is_oem'] = 0;
+
+                $supplier_detail = $this->Suppliers->add_supplier($input);
+
+                if($supplier_detail->action == 1){
+                    $this->session->set_flashdata('success_message', $supplier_detail->message);
+                }else if($supplier_detail->action == 0){
+                    $this->session->set_flashdata('error_message', $supplier_detail->message);
+                }else{
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                redirect(BASE_URL.'supplier-list');
+            }
+        }        
+	}
+
+
+    public function oem_list()
+	{           
+        $this->oem_list = $this->Suppliers->list_supplier(array('is_oem'=>'1'));
+	}
+
+    public function add_oem()
+	{	        
+        if($this->input->post()){
+            $this->form_validation->set_rules('company_name', 'Company name', 'trim|required');           
+            $this->form_validation->set_rules('mobile_no', 'contact no.', 'trim|required|numeric|exact_length[10]');
+            $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');
+            $this->form_validation->set_rules('address', 'Address', 'trim');
+            $this->form_validation->set_rules('additional_info', 'Additional Info', 'trim');
+            if ($this->form_validation->run()){
+                $input['supplier_id'] = 0; 
+                $input['company_name'] = $this->input->post('company_name');
+                $input['email'] = $this->input->post('email');
+                $input['mobile_no'] = $this->input->post('mobile_no');
+                $input['address'] = $this->input->post('address');		
+                $input['additional_info'] = $this->input->post('additional_info');
+                $input['gst_no'] = $this->input->post('gst_no');
+                $input['pan_no'] = $this->input->post('pan_no');
+                $input['created_by'] = $this->user_detail->user_id;
+                $input['is_oem'] = 1;
+                
+                $oem_detail = $this->Suppliers->add_supplier($input);                
+
+                if($oem_detail->action == 1){
+                    $this->session->set_flashdata('success_message', $oem_detail->message);
+                }else if($oem_detail->action == 0){
+                    $this->session->set_flashdata('error_message', $oem_detail->message);
+                }else{
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                redirect(BASE_URL.'oem-list');
+            }
+        }        
+	}
+    function delete_supplier($supplier_id)
+    {
+        $supplier_list = $this->Suppliers->list_supplier(array('is_oem'=>'0'));
+
+        if (!empty($supplier_list)) {
+            $supplier_detail = $this->Suppliers->add_supplier (array(
+                'supplier_id' => $supplier_id));
+            if ($supplier_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $supplier_detail->message);
+            } else if ($supplier_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $supplier_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'supplier-list', 'refresh');
+	}
+}

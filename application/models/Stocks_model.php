@@ -1,0 +1,61 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Stocks_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+
+	function product_stock($input){
+		$store_id = $input['store_id'] ?? 0;
+		$oem_id = $input['oem_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$product_id = $input['product_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		return $product_stock = $this->Common_model->callSP("GET_PRODUCT_STOCK(".$store_id.",".$oem_id.",".$category_id.",".$product_id.")", $result_type);
+	}
+
+	function product_stock_at_grn($input){
+		$store_id = $input['store_id'] ?? 0;
+		$oem_id = $input['oem_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		return $product_stock_at_grn = $this->Common_model->callSP("GET_PENDING_GRN_LIST(".$store_id.")", $result_type);
+	}
+
+	function total_stock_value($input){
+		$store_id = $input['store_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		return $total_stock_value = $this->Common_model->callSP("GET_TOTAL_STOCK_VALUE(".$store_id.")", $result_type);
+	}
+
+	function put_away_pending($input) {
+		$store_id = $input['store_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		return $put_away_pending = $this->Common_model->callSP("GET_PENDING_PUT_AWAY(".$store_id.")", $result_type);
+	}
+	function location_detail($input) {
+		$location_no = $input['location_no'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$box_no = $input['box_no'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$location_detail = $this->Common_model->callSP("GET_LOCATION_DETAIL(".$location_no.",".$store_id.",'".$box_no."')",$result_type);
+		return $location_detail;
+	}
+	function box_detail($input) {
+		$box_no = $input['box_no'] ?? NULL;
+		$result_type = $input['result_type'] ?? '';
+		$box_detail = $this->Common_model->callSP("GET_BARCODE_DETAIL(".$box_no.")",$result_type);
+		return $box_detail;
+	}
+	function save_stock_audit($input){
+		$box_no = $input['box_no'] ?? NULL;
+		$location_no = $input['location_no'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$save_stock_audit = $this->Common_model->callSP("SAVE_STOCK_AUDIT(".$location_no.",".$box_no.",".$created_by.")",$result_type);
+		return $save_stock_audit;
+	}
+}
+

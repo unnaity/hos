@@ -1,0 +1,383 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+	require("class.phpmailer.php");
+	function pr($var){ 
+		echo "<pre>";
+		print_r($var);
+		echo "</pre>";
+	}
+
+	function mailSend($toEmail,$fromEmail,$ccEmail,$bccEmail,$message,$subject) {
+		//include(BASEPATH.'/phpmailer/class.phpmailer.php');
+	    $mail = new PHPMailer;
+	    $mail->IsSMTP();                                      	// Set mailer to use SMTP
+	    $mail->Host = "vynzresearch.com";                 		// Specify main and backup 
+	    $mail->SMTPAuth = true;                               	// Enable SMTP 
+	    $mail->Port = 587;
+		$mail->Username = "mailer@vynzresearch.com";
+		$mail->Password = "a8S3(pQ=N9W4";              			// SMTP password
+	    //$mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted
+	    $mail->From = $fromEmail;
+	    $mail->FromName = 'Vynz Research';
+	    //$mail->AddAddress($email, $email);  // Add a recipient jitendra@vynzresearch.com,birendra.kumar@vynzresearch.com,subhash.anand@vynzresearch.com,enquiry@vynzresearch.com
+	    $mail->AddAddress($toEmail);
+	    if(isset($bccEmail) && !empty($bccEmail)){
+	    	for ($i=0; $i < count($bccEmail); $i++) { 
+	    		$mail->AddBcc($bccEmail[$i],$bccEmail[$i]);
+	    	}
+		}
+	    $mail->IsHTML(true);                                 // Set email format to HTML
+	    $mail->Subject = $subject;
+	    $mail->Body    = $message;
+	    //print_r($mail);exit;
+	    if(!$mail->Send()){            
+	      	/*echo "Message could not be sent. <p>";
+			echo "Mailer Error: " . $mail->ErrorInfo;*/
+			return false;
+			exit;      
+	    }else{
+	      return true;
+	    }        
+  	}
+
+	function activeTemplate(){
+		return 'admin-html';
+	}
+
+	function setPaginationConfig($base_url,$total_rows,$c_page,$per_page=20){
+		$config['base_url'] = $base_url;
+		$config['total_rows'] = $total_rows;
+		$page = ($c_page) ? $c_page : 0;
+		$config['per_page'] = $per_page;
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$config['cur_tag_open'] = '<li><a>';
+		$config['cur_tag_close'] = '</a></li>';
+		$config['cur_page'] = $c_page;
+		$config['last_tag_open'] = '<li>';
+		$config['last_tag_close'] = '</li>';
+		$config['next_tag_open'] = '<li>';
+		$config['next_tag_close'] = '</li>';
+		$config['prev_tag_open'] = '<li>';
+		$config['prev_tag_close'] = '</li>';
+		$config['first_tag_open'] = '<li>';
+		$config['first_tag_close'] = '</li>';
+		$config['first_link'] = '<<';
+		$config['last_link'] = '>>';
+		$config['cur_tag_open'] = '<li> <a class="pagiCurrent" >';
+		$config['cur_tag_close'] = '</a></li>';
+		return $config;
+	}
+
+	function searchkey(){
+		return $key = array ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+	}
+
+	function setEmailTemplate($msg){
+		$message_header= '<html><body><style type="text/css">
+		*{font:normal 15px/22px proxima_nova_rgregular, Arial, Helvetica, sans-serif;color:#666;margin:0;padding:0}
+		@font-face{font-family:proxima_nova_rgregular;src:url('.base_url().'admin-html/fonts/proximanova-regular-webfont.eot?#iefix) format(embedded-opentype), url(fonts/proximanova-regular-webfont.woff) format(woff), url('.base_url().'admin-html/fonts/proximanova-regular-webfont.ttf) format(truetype), url(fonts/proximanova-regular-webfont.svg#proxima_nova_rgregular) format(svg);font-weight:400;font-style:normal}
+ul{padding:10px 0}
+ul li{color:#646464;font:15px/20px proxima_nova_rgregular;list-style:none;background:url('.base_url().'admin-html/images/bult2.png) no-repeat left 5px;padding:0 0 5px 15px}
+a{color:#00a3a5;text-decoration:none}
+a:hover{color:#00a3a5;text-decoration:underline}
+p{color:#646464; font:15px/20px proxima_nova_rgregular;}
+</style>
+
+<table width="740" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #ccc;">
+  <tr>
+    <td align="left" valign="top"><img src="'.base_url().'admin-html/images/newsLetterHdr.jpg" width="740" height="110" alt=""></td>
+  </tr>
+  <tr><td valign="top" align="left" style="padding:65px 30px 60px; color:#646464; font:15px/20px proxima_nova_rgregular;">';
+	$message_footer='</td></tr>
+  <tr>
+    <td align="center" valign="top" style="padding:15px 30px 15px; color:#646464; font:15px/20px proxima_nova_rgregular; border-top:1px solid #ccc"><p style="color:#646464; font:15px/20px proxima_nova_rgregular;"><span style="color:#00a3a5;">Address:</span> 205 Henderson Road, Singapore 159549 | <span style="color:#00a3a5;">Phone:</span> 65 6334 4022</p></td>
+  </tr>
+  <tr>
+    <td align="center" valign="middle" style="background:#000; color:#ababab; height:36px; font:13px/36px proxima_nova_rgregular;">&copy; Copyright 2014 Revival by Design . All Rights Reserved</td>
+  </tr>
+</table>
+</body></html>';
+	return $message = $message_header.$msg.$message_footer;
+
+	}
+
+	function pdfHeader(){
+		$message_header= '<table width="740" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #ccc;">
+		<tr>
+		    <td align="left" valign="top"><img src="'.base_url().'admin-html/images/newsLetterHdr.jpg" width="740" height="110" alt=""></td>
+	  	</tr>
+	  	<tr><td valign="top" align="left" style="padding:65px 30px 60px; color:#646464; font:15px/20px proxima_nova_rgregular;"><?tr></table>';
+		return 	$message_header;
+	}
+
+	function getEmailNotification(){
+		$CI =& get_instance();
+		return $notification = $CI->common_model->getResults('*','rbd_email_notification');
+	}
+
+	function getHeaderMenu(){
+		$CI =& get_instance();
+		return $menu = $CI->common_model->getHeaderMenu();
+	}
+
+	function getFooterMenu(){
+		$CI =& get_instance();
+		return $menu = $CI->common_model->getFooterMenu();
+	}
+
+	function getAllMenu(){
+		$CI =& get_instance();
+		$where = array('status' => '1');
+		return $menu = $CI->common_model->getResults('page_title,slug','tbl_pages',$where);
+	}
+	
+	function getSocialMedia(){
+		$CI =& get_instance();
+		$where = array('status' => '1');
+		return $menu = $CI->common_model->getResults('social_media,link,image','tbl_social_meida_link',$where,'rank','ASC');
+	}
+
+	function dateDiffTime($date2=null,$date1=null){
+		$diff = abs(strtotime($date2) - strtotime($date1)); 
+		$years   = floor($diff / (365*60*60*24)); 
+		$months  = floor(($diff - $years * 365*60*60*24) / (30*60*60*24)); 
+		$days    = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+		$hours   = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24)/ (60*60)); 
+		$minuts  = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24 - $hours*60*60)/ 60); 
+		$seconds = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24 - $hours*60*60 - $minuts*60)); 
+		//printf("%d years, %d months, %d days, %d hours, %d minuts\n, %d seconds\n", $years, $months, $days, $hours, $minuts, $seconds);
+		$str = '';
+		if($years > 0){
+			$str = $years.'Years ,';
+		}
+	
+		if($months > 0){
+			$str .= $years.'Months';
+		}
+	
+		if($days > 0){
+			$str .= $days.'days';
+		}
+
+		if($hours > 0){
+			$str .= $hours.'hours,';
+		}
+	
+		if($minuts > 0){
+			$str .= $minuts.'minuts,';
+		}
+		if($seconds > 0){
+			$str .= $seconds.'seconds,';
+		}
+		return $str;
+	}
+
+
+	function displayDate($date=null,$formate='Y-m-d'){
+		date_default_timezone_set('Asia/Singapore');
+		if($date){
+		 	$strtime = strtotime($date);
+			 return date($formate,$strtime);
+		}else{
+			return date($formate);
+		}
+	}
+
+
+	function getMetaData($table){
+		$CI =& get_instance();
+		return $CI->common_model->getSingleRow('*',$table);
+	}
+
+	function getHomePageVidoId(){
+		$CI =& get_instance();
+		$link =  $CI->common_model->getValue('tbl_youtube','link',array('id'=> 1)); 
+		//echo $CI->db->last_query();exit;
+		return get_youtube_videos($link);
+	}
+
+	function get_youtube_videos($string) {
+	  	$url = $string;
+		parse_str( parse_url( $url, PHP_URL_QUERY ), $my_array_of_vars );
+		return $my_array_of_vars['v']; 
+	}
+
+	function checkCookies(){
+		$CI =& get_instance();
+		$CI->load->helper('cookie');
+		//print_r($_COOKIE);exit;
+		$ip = $_SERVER["REMOTE_ADDR"];
+		//$user_id = $_COOKIE['user_id'];
+		$registeredUser =  $CI->common_model->getSingle('tbl_user',array('ip'=>$ip,'status'=>'1','is_deleted'=>'0'));
+		//echo $CI->db->last_query();exit;
+		return $registeredUser; 
+	}
+	
+	/*function imgResize($inFile, $outFile="", $width=100, $height=100){
+		$CI =& get_instance();
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = $inFile;
+		$config['new_image'] = $outFile;
+		$config['thumb_marker'] = '';
+		$config['create_thumb'] = TRUE;
+		$config['maintain_ratio'] = FALSE;
+		$config['width'] = $width;
+		$config['height'] = $height;
+		$CI->image_lib->initialize($config);	
+		$CI->image_lib->resize();		  
+    }*/
+	
+	function imgResize($inFile, $outFile="", $width=100, $height=100){
+		$CI =& get_instance();
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = $inFile;
+		$config['new_image'] = $outFile;
+		$config['thumb_marker'] = '';
+		$config['create_thumb'] = TRUE;
+		$config['maintain_ratio'] = TRUE;
+		$config['width'] = $width;
+		$config['height'] = $height;
+		$CI->image_lib->initialize($config);
+		$CI->image_lib->resize();		
+    }
+	
+	function imgResize2($inFile, $outFile="", $width=100, $height=100){
+		$CI =& get_instance();
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = $inFile;
+		$config['new_image'] = $outFile;
+		$config['thumb_marker'] = '';
+		$config['create_thumb'] = TRUE;
+		$config['maintain_ratio'] = FALSE;
+		$config['width'] = $width;
+		$config['height'] = $height;
+		$CI->image_lib->initialize($config);
+		$CI->image_lib->resize();
+		
+    }
+	
+	function randomPasword($length){
+		$smallAlphabets = range('a','z');
+		$capsAlphabets = range('A','Z');
+		$numbers = range('1','9');
+		$additional_characters = array('_','-');
+		$final_array = array_merge($smallAlphabets,$numbers,$additional_characters,$capsAlphabets);
+		$password = '';
+		while($length--) {
+		  $key = array_rand($final_array);
+		  $password .= $final_array[$key];
+		}
+		return $password;
+	}
+	
+	function create_unique_slug($string, $table)
+	{		
+		$CI =& get_instance();
+		$slug = url_title($string);
+		$slug = strtolower($slug);
+		$i = 0;
+		$params = array ();
+		$params['slug'] = $slug;
+		//$params['status'] = '0';
+		while ($CI->db->where($params)->get($table)->num_rows()) {
+			if (!preg_match ('/-{1}[0-9]+$/', $slug )) {
+				$slug .= '-' . ++$i;
+			} else {
+				$slug = preg_replace ('/[0-9]+$/', ++$i, $slug );
+			}
+			$params ['slug'] = $slug;
+			}
+		return $slug;
+	}  	
+
+	function get_last_id($string, $table, $where=NULL)
+	{		
+		$last_id=0;
+		$CI =& get_instance();		
+		$row_detail = $CI->Common_model->getCount($table,$where,$string,'DESC');		
+		if($row_detail){
+			$last_id = $row_detail+1;
+		}else{
+			$last_id = $last_id+1;
+		}
+		return $last_id;
+	}
+
+	function getAllBranch($branch_id){
+		$CI =& get_instance();		
+		return $branch_option = $CI->Options->branch_option(array('selected_value'=>$branch_id));
+	}
+
+	function getAllStore($branch_id = NULL,$store_id=NULL){
+		$CI =& get_instance();
+		return $store_option = $CI->Options->store_option(array('branch_id'=>$branch_id,'selected_value'=>$store_id));
+	}
+
+	function get_delete_btn($url){
+		return $btn_html = '<button id="bDel" type="button" onclick="confirm_modal('."'$url'".');" class="btn btn-sm btn-danger" title="Delete"><i class="fe fe-trash-2"> </i></button>';
+	}
+
+	function get_additional_info(){
+		return $btn_html = '<div class="row"><div class="col-md-12">
+										<div class="form-group">
+											<label class="form-label mb-3">Comment(if any):</label>
+											<textarea class="content" name="additional_info">'.set_value('additional_info').'</textarea>
+										</div>
+									</div>
+								</div>';
+	}
+
+	function get_client_list($client_id){
+		$CI =& get_instance();
+		return $client_list = $CI->Options->get_client_list(array('client_id'=>$client_id));
+	}
+
+	function excelExport($header='', $data='', $fileName='Excel_export'){
+
+		$alpha = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+	
+		// Create new PHPExcel object
+		$objPHPExcel = new PHPExcel();
+	
+		if(isset($header) && !empty($header)){
+			$j=1;
+			$objPHPExcel->setActiveSheetIndex(0)->setCellValue($alpha[0].'1', 'Sl. No.');
+			for ($i=0; $i < count($header); $i++) { 
+				
+				$objPHPExcel->setActiveSheetIndex(0)->setCellValue($alpha[$j].'1', $header[$i]);
+				$j++;
+			}
+		}            
+	
+		if(isset($data) && !empty($data)){
+			$j=2;
+			
+			foreach ($data as $key) {
+				$k = 1;
+				for ($i=0; $i < count($key); $i++) { 
+					$objPHPExcel->setActiveSheetIndex(0)->setCellValue($alpha[$i].$j, $key[$i]);
+					$k++;
+				}
+				$j++;            
+			}        
+		}            
+		$objPHPExcel->getActiveSheet()->setTitle('Simple');
+		$objPHPExcel->setActiveSheetIndex(0);
+	
+		ob_end_clean();
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment;filename="'.$fileName.'_'.strtotime(date('Y-m-d H:i:s')).'.xlsx"');
+		header('Cache-Control: max-age=0');
+		// If you're serving to IE 9, then the following may be needed
+		header('Cache-Control: max-age=1');
+		header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+		header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+		header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+		header ('Pragma: public'); // HTTP/1.0
+	   
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+		$objWriter->save('php://output');
+		
+		exit;
+	
+	}

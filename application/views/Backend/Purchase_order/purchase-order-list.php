@@ -1,0 +1,99 @@
+<!-- Main Content-->
+<div class="main-content pt-0">
+	<div class="side-app">
+		<div class="main-container container-fluid">
+			<!-- Page Header -->
+			<div class="page-header" style="min-height:unset;">
+				<h4 class="text-start" >Purchase Order List</h4>
+				<div class="btn btn-list">
+					<a class="btn ripple btn-secondary" href="#" title="Download"><i class="fe fe-download"></i></a>				
+					<a class="btn ripple btn-success" href="<?php echo BASE_URL.'create-purchase-order'?>" title="Create Purchase Order"><i class="fe fe-plus"></i></a>
+				</div>
+			</div>
+			<!-- End Page Header -->
+			<?php $this->load->view('Backend/Elements/success-message.php'); ?>
+
+            <!-- Row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card custom-card">
+						<div class="card-body">							
+							<?php $this->load->view('Backend/Elements/Alert.php'); ?>							
+                            <!-- <form action="" id="create-grn" method="POST" data-parsley-validate="">
+                                <div class="row">	
+                                    <div class="col-md-3">	
+                                        <div class="form-group">
+                                            <label class="form-label">Purchase Order No:</label>
+                                            <input class="form-control" name=purchase_order_no" id="purchase_order" value="" type="text">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+										<div class="form-group">
+											<label class="form-label">Customer Name: </label>
+											<select class="form-control select2" name="customer_id" required id="customer_id">
+												<option value="">Select customer</option>
+												<?php echo $this->customer_option; ?>
+											</select>
+										</div>	
+									</div>
+ 
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">P.O. from Date:</label>
+                                            <input class="form-control" name="from_date" id="from_date" value="" type="date">
+                                        </div>	
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">P.O. to Date:</label>
+                                            <input class="form-control" name="to_date" id="to_date" value="" type="date">
+                                        </div>	
+                                    </div>                                    
+                                </div>	
+                                <div class="row">
+                                    <div class="col-md-12 tx-center-f">    
+                                        <button class="btn ripple btn-info" type="submit" >Find</button>
+                                    </div>
+                                </div>	
+                            </form> 							
+						</div> -->
+					
+						<div class="card-body">							
+							<div class="table-responsive">
+								<table id="example2" class="table table-striped table-bordered text-nowrap" style="border-left:1px solid #e1e6f1;">
+									<thead>
+										<tr>
+                                            <th>PO No.</th>
+											<th>PO Date</th>
+											<th>Customer Name</th>                      
+                                            <th>Detail</th>											
+										</tr>
+									</thead>
+									<tbody>
+									<?php if(isset($this->purchase_order_list)):
+										foreach($this->purchase_order_list as $obj): ?>
+										<tr>
+                                            <td><?php echo $obj->purchase_order_no ?></td>
+                                            <td><?php echo $obj->po_date ?></td>
+											<td><?php echo $obj->company_name ?></td>
+											<td>
+                                                <a class="btn btn-sm btn-info" href="<?php echo BASE_URL.'purchase-order/'.$obj->purchase_order_id; ?>" title="View Detail" target="_blank"><i class="fe fe-eye"></i>
+											</td>
+										</tr>
+									<?php endforeach;
+									else: echo "<tr><td colspan='4'>No record found!</td></tr>";
+									endif;
+									?>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Row -->
+		</div>
+	</div>
+</div>
+<!-- End Main Content-->

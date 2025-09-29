@@ -1,0 +1,152 @@
+<!-- Main Content-->
+<div class="main-content pt-0">
+	<div class="side-app">
+		<div class="main-container container-fluid">
+			<!-- Page Header -->
+			<div class="page-header">
+				<h4 class="text-start mb-0"><?php echo "Add " . UCFIRST($this->class_name); ?></h4>
+				<div class="btn btn-list">
+					<a href="<?php echo BASE_URL . 'product-list' ?>">
+						<button aria-label="Close" class="btn ripple btn-dark btn-rounded" type="button"><span aria-hidden="true">&times;</span></button></a>
+				</div>
+			</div>
+			<?php $this->load->view('Backend/Elements/Alert.php'); ?>
+			<!-- End Page Header -->
+
+			<!-- Row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card custom-card">
+						<div class="card-body">
+
+
+							<form action="<?php echo BASE_URL . $this->page_name ?>" method="POST" data-parsley-validate="">
+								<div class="row">
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Category: <span class="tx-danger">*</span></label>
+											<select class="form-control select2 show-hsn" name="category_id" required>
+												<option value="">Select category</option>
+												<?php echo $this->category_option; ?>
+											</select>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Sub-Category:</label>
+											<select class="form-control select2" name="subcategory_id">
+												<option value="">Select sub-category</option>
+												<?php echo $this->cateory_wise_subcategory_list; ?>
+											</select>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group supplier-option">
+											<label class="form-label">OEM:</label>
+											<select class="form-control select2 on_change" name="oem_id" id="oem_id" required>
+												<option value="">Select OEM</option>
+												<?php echo $this->oem_option; ?>
+											</select>
+										</div>
+									</div>
+
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Model:</label>
+											<select class="form-control on_change select2 " name="model_id" id="model_id">
+												<option value="">Select model</option>
+												<?php echo $this->model_option; ?>
+											</select>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group size-option">
+											<label class="form-label">Size:</label>
+											<select class="form-control on_change select2" name="size_id" id="size_id">
+												<option value="">Select Size</option>
+												<?php echo $this->size_option; ?>
+											</select>
+										</div>
+									</div>
+
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Material/Quality:</label>
+											<select class="form-control select2 on_change" name="quality_id" id="quality_id">
+												<option value="">Select Quality</option>
+												<?php echo $this->quality_option; ?>
+											</select>
+										</div>
+									</div>
+
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">SKU: </label>
+											<input class="form-control on_change" name="product_sku" id="product_sku" value="<?php echo set_value('product_sku'); ?>" placeholder="Enter SKU" type="text">
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">HSN Code:</label>
+											<input class="form-control" name="hsn_code" id="hsn_code" value="<?php echo set_value('hsn_code'); ?>" placeholder="Enter hsn code" type="text">
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Article Code:</label>
+											<input class="form-control" name="article_code" id="article_code" value="<?php echo set_value('article_code'); ?>" placeholder="Enter article code" type="text">
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group supplier-option">
+											<label class="form-label">Unit of Measure:</label>
+											<select class="form-control select2" name="unit_id" required>
+												<option value="">Select Unit</option>
+												<?php echo $this->uom_option; ?>
+											</select>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group">
+											<label class="form-label">Product name: <span class="tx-danger">*</span></label>
+											<input class="form-control" name="product_name" id="product_name" value="<?php echo set_value('product_name'); ?>" placeholder="Enter product name" required="" type="text">
+										</div>
+									</div>
+
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label class="form-label mb-3">Additional Info.:</label>
+											<textarea class="content" name="additional_info"><?php echo set_value('additional_info'); ?></textarea>
+										</div>
+									</div>
+								</div>
+								<button class="btn ripple btn-primary" type="submit">Save</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Row -->
+		</div>
+	</div>
+</div>
+<!-- End Main Content-->
+
+<Style>
+	.table>thead>tr>th {
+		font-size: 13px;
+		font-weight: 500;
+		text-transform: unset;
+	}
+
+	.no-border {
+		padding: 0;
+		border: unset;
+	}
+
+	.richText .richText-editor {
+		height: 80px;
+	}
+</style>

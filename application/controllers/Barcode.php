@@ -1,0 +1,62 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Barcode extends CI_Controller {
+	function __construct()
+    {
+        parent::__construct();
+        if ($this->session->userdata('is_loggedin') != 1)
+            redirect(BASE_URL . 'login', 'refresh');
+
+        $this->load->model('Settings_model','Settings');
+        $this->load->model('Products_model','Products'); 
+        $this->load->model('Pick_list_model','Pick_list'); 
+        $this->load->model('Raw_material_model','Raw_material'); 
+        $this->load->model('Semi_finish_good_model','Semi_finish_good'); 
+        $this->user_detail = $this->session->userdata('user_detail');
+        $this->branch_id = $this->session->userdata('branch_id');
+        $this->store_id = $this->session->userdata('store_id');
+        //$this->client_name = $this->session->userdata('user_detail');
+    }
+    
+	public function index($method){ }
+
+    function location_barcode($value=0){
+		
+		$this->pdf_size = $this->db->query("SELECT * FROM tbl_pdf_size ps WHERE ps.print_for = 'location' ")->row();
+        $this->location_list = $this->Settings->list_location(array('location_id'=>$value,'store_id'=>$this->store_id));
+        $this->load->view('Backend/Barcode/location-barcode');
+	}
+
+    function box_slip($value=0){		
+		$this->pdf_size = $this->db->query("SELECT * FROM tbl_pdf_size ps WHERE ps.print_for = 'location' ")->row();        
+        $this->grn_detail = $this->Products->list_product_grn(array('store_id' => $this->store_id,'product_grn_detail_id'=>$value,'result_type'=>'row')); 
+
+        $this->box_detail = $this->db->query("SELECT * FROM tbl_box_detail bd INNER JOIN tbl_product_grn tpg ON tpg.product_grn_id = bd.product_grn_id WHERE bd.product_grn_detail_id = ".$value)->result(); 
+        // pr($this->box_detail);exit;       
+        $this->load->view('Backend/Barcode/box-qrcode');
+	}
+
+    function dispatch_box_slip($value=0){		
+		$this->pdf_size = $this->db->query("SELECT * FROM tbl_pdf_size ps WHERE ps.print_for = 'location' ")->row();        
+        $this->dispatch_list = $this->Pick_list->dispatch_list(array('pick_list_id'=>$value,'store_id' => $this->store_id,'result_type'=>'row'));       
+        //$this->grn_detail = $this->Products->list_product_grn(array('store_id' => $this->store_id,'product_grn_detail_id'=>$value,'is_quality_checked' => '1','result_type'=>'row'));        
+        $this->box_detail = $this->db->query("SELECT * FROM tbl_box_detail bd INNER JOIN tbl_product_grn tpg ON tpg.product_grn_id = bd.product_grn_id WHERE bd.box_detail_id = ".$this->dispatch_list->box_detail_id)->result();
+        $this->load->view('Backend/Barcode/dispatch-box-slip');
+	}
+    function rm_box_slip($value=0){		
+		$this->pdf_size = $this->db->query("SELECT * FROM tbl_pdf_size ps WHERE ps.print_for = 'location' ")->row();   
+        $this->box_detail = $this->db->query("SELECT * FROM tbl_rm_box_detail rbd INNER JOIN tbl_rm_grn trg ON trg.rm_grn_id = rbd.rm_grn_id WHERE rbd.rm_grn_detail_id = ".$value)->result();  
+        //    pr($this->rm_grn_detail);exit;
+        $this->rm_grn_detail = $this->db->query("SELECT * FROM tbl_rm_grn trg INNER JOIN tbl_rm_grn_detail trgd ON trgd.rm_grn_id = trg.rm_grn_id INNER JOIN tbl_raw_material rm ON rm.raw_material_id = trgd.rm_id  INNER JOIN tbl_supplier s ON s.supplier_id = trg.supplier_id INNER JOIN tbl_category c ON c.category_id = rm.category_id WHERE trgd.rm_grn_detail_id = ".$value)->row(); 
+        //  pr( $this->rm_box_detail);exit;
+        $this->load->view('Backend/Barcode/rm-box-slip');
+	}
+    function sfg_box_slip($value=0){		
+		$this->pdf_size = $this->db->query("SELECT * FROM tbl_pdf_size ps WHERE ps.print_for = 'location' ")->row();   
+        // $this->box_detail = $this->db->query("SELECT * FROM tbl_sfg_box_detail sbd INNER JOIN tbl_sfg_grn tsg ON tsg.sfg_grn_id = sbd.sfg_grn_id WHERE sbd.sfg_grn_detail_id = ".$value)->result(); 
+        $this->box_detail = $this->Semi_finish_good->get_barcode(array('sfg_grn_detail_id'=>$value,'store_id'=>$this->store_id));
+        // pr($this->box_detail);exit;
+        $this->load->view('Backend/Barcode/sfg-box-slip');
+	}
+}

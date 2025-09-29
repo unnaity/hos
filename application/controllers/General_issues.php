@@ -1,0 +1,425 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Pick_list extends CI_Controller {
+	function __construct()
+    {
+        parent::__construct();
+        if ($this->session->userdata('is_loggedin') != 1)
+            redirect(BASE_URL . 'login', 'refresh');
+        
+        $this->load->model('Pick_list_model','Pick_list');
+        $this->load->model('Sales_order_model','Sales_order');        
+    }
+    
+	public function index($method)
+	{	 
+        $this->class_name = $this->router->fetch_class();
+        $this->page_name = $method;
+        $this->user_detail = $this->session->userdata('user_detail');
+        $this->branch_id = $this->session->userdata('branch_id');
+        $this->store_id = $this->session->userdata('store_id');
+        $this->result_type = 'row';
+        $this->user_id = $this->user_detail->user_id;
+        $this->client_id = $this->user_detail->client_id;
+        $this->data = [];       
+        $this->purchase_order_id = $this->uri->segment(2);
+
+        switch ($method) {
+            case 'create-pick-list':
+                $this->create_pick_list();
+                break;
+            case 'get-order-list':
+                $this->get_order_list(); exit;
+                break;
+            case 'show-box-detail':
+                $this->show_box_detail(); exit;
+                break;
+            case 'save-box-detail':
+                $this->save_box_detail(); exit;
+                break;    
+            case 'dispatch-list':
+                $this->dispatch_list();
+                break;    
+            case 'sales-order-product-list':
+                $this->sales_order_product_location(); exit; 
+            case 'get-pick-list-item':
+                $this->get_pick_list_item(); exit;
+            case 'check-pick-list':
+                $this->check_pick_list(); exit;         
+            default:                
+                break;
+        };      
+        $this->load->view('Backend/'.$this->class_name.'/index',$this->data);  
+	}
+
+    function get_order_list(){
+        $customer_id = $this->input->post('customer_id');
+        if(!empty($customer_id)){
+            $sales_order_list = $this->Sales_order->list_sales_order(array('store_id' => $this->store_id,'customer_id'=>$customer_id));                  
+            $order_option = '';
+            if($sales_order_list){
+                $order_option .= '<option value="">Choose one</option>';
+                foreach($sales_order_list as $obj){  
+                    if($obj->sales_order_status_id != 6){                  
+                        $order_option .= '<option value="'.$obj->sales_order_id.'">'.$obj->sales_order_no.'</option>';
+                    }
+                }
+            } 
+        }
+        echo $order_option;
+    }
+
+    function sales_order_product_location(){
+        $sales_order_id = $this->input->post('sales_order_id');
+        $sales_order_product_location = $this->Pick_list->sales_order_product_location(array('store_id' => $this->store_id,'sales_order_id' => $sales_order_id));
+        $td='';
+        if($sales_order_product_location){ $i=1;
+            foreach($sales_order_product_location as $obj){
+                
+                $td .='<tr><td>'.$i.'.</td><td>'.(!empty($obj->product_alias)?$obj->product_alias:$obj->product_name).'</td><td>'.$obj->quantity.'</td><td>'.$obj->location_name.'</td></tr>';
+                $i++;
+            }
+        }
+        echo $td;
+    }
+
+    function get_pick_list_item(){
+        $sales_order_id = $this->input->post('sales_order_id');
+        $get_pick_list_item = $this->Pick_list->dispatch_list(array('store_id' => $this->store_id,'sales_order_id'=>$sales_order_id));
+        $td='';
+        if($get_pick_list_item){ $i=1;
+            foreach($get_pick_list_item as $obj){                
+                $td .='<tr><td>'.(!empty($obj->product_alias)?$obj->product_alias:$obj->product_name).'</td><td>'.$obj->box_no.'</td><td>'.$obj->box_no.'</td><td>'.$obj->no_of_items.'</td></tr>';
+                $i++;
+            }
+        }
+        echo $td;
+    }
+
+    function create_pick_list(){
+        
+        if($this->input->post()){
+            $this->session->set_flashdata('success_message', 'Pick list created successfully.');
+            redirect(BASE_URL . $this->page_name, 'refresh');
+        }
+       
+        $this->category_option = $this->Options->category_option();
+        $this->customer_option = $this->Options->customer_option();
+        $this->uom_option = $this->Options->uom_option(); 		
+    }
+
+    function save_box_detail_old(){
+        $sales_order_id = $this->input->post('order_id');
+        $pick_list_box_no = $this->input->post('pick_list_box_no');
+        $delivery_date = $this->input->post('delivery_date');
+        //$delivery_date = date('Y-m-d');
+        $product_id = [];
+        $sales_order_qty=0;
+        $no_of_items = 0;
+
+        $pick_list_boxes = $this->Pick_list->box_list(array('store_id' => $this->store_id,'pick_list_box_no' => $pick_list_box_no,'result_type'=>$this->result_type));
+        $data = [];
+        if(!empty($pick_list_boxes)){
+            
+            $box_product_id = $pick_list_boxes->product_id;
+            $box_detail_id = $pick_list_boxes->box_detail_id;
+
+            if($pick_list_boxes->remaining_item > 0){
+                $sales_order_product_location = $this->Pick_list->sales_order_product_location(array('store_id' => $this->store_id,'sales_order_id' => $sales_order_id));
+                if($sales_order_product_location){
+                    foreach($sales_order_product_location as $obj){
+                        $product_id[] = $obj->product_id;
+                        if($box_product_id == $obj->product_id){
+                            $sales_order_qty = $obj->quantity;
+                        }
+                    }
+                }
+                
+                if(in_array($box_product_id,$product_id)){
+                    //echo $sales_order_qty;
+                    //echo "test";
+                    //echo $pick_list_boxes->no_of_items;
+                    if($sales_order_qty <= $pick_list_boxes->no_of_items){
+                        $remaining_item = $pick_list_boxes->remaining_item - $sales_order_qty;
+                        $pick_list_qty = $sales_order_qty;
+                    }else{
+                        $pick_list_qty = $pick_list_boxes->remaining_item;
+                        $remaining_item = 0;
+                    }               
+
+                    $get_pick_list_item = $this->Pick_list->get_pick_list_item(array(
+                                                                                    'sales_order_id'=>$sales_order_id,
+                                                                                    'product_id'=>$box_product_id,
+                                                                                    )
+                                                                            );
+                    //pr($get_pick_list_item);
+                    if($get_pick_list_item){
+                        foreach($get_pick_list_item as $pObj){
+                            $no_of_items = $no_of_items + $pObj->no_of_items;
+                        }
+                    }
+                    //echo $no_of_items."<br>";
+                    //echo $sales_order_qty."<br>";exit;
+
+                    if(empty($get_pick_list_item) || ($no_of_items < $sales_order_qty)){ 
+                        
+                        if($no_of_items < $sales_order_qty){
+                            if($no_of_items == 0){
+                                $pick_list_qty = $pick_list_boxes->no_of_items;
+                            }else{
+                                $pick_list_qty = $sales_order_qty - $no_of_items;
+                            }
+                            $remaining_item = $pick_list_boxes->remaining_item - $pick_list_qty;
+                        }
+
+                        $update_remaining_item = $this->Pick_list->update_remaining_item(array('box_detail_id'=>$box_detail_id, 'remaining_item'=>$remaining_item));
+                        
+                        $add_pick_list_item = $this->Pick_list->add_pick_list_item(array(
+                                                                                'sales_order_id'=>$sales_order_id,
+                                                                                'product_id'=>$box_product_id,
+                                                                                'box_detail_id'=>$box_detail_id,
+                                                                                'no_of_items'=>$pick_list_qty,
+                                                                                'delivery_date'=>$delivery_date,
+                                                                                'created_by'=>$this->user_id
+                                                                                //'result_type'=>$this->result_type
+                                                                            )
+                                                                        );
+                        
+                        $box_detail_html = '<tr id="tr_'.$pick_list_boxes->box_no.'"><td>'.$pick_list_boxes->product_name.'</td>
+                        <td>'.$pick_list_boxes->box_no.'</td>
+                        <td>'.$pick_list_boxes->location_name.'</td>
+                        <td>'.$pick_list_qty.'</td>
+                        </tr>';
+                        //<td><button type="button" name="remove" onclick="remove_pick_list('.$add_pick_list_item.','.$sales_order_id.')" class="btn btn-sm btn-danger"><span class="fe fe-trash-2"> </span></button></td>
+                        $data = array('message'=>'', 'status' => 1,'data'=>$box_detail_html);
+                    }else{                    
+                        $data = array('message'=>'Pick list is already completed for this item.', 'status' => 0,'data'=>json_encode($pick_list_boxes));
+                    }
+
+                }else{
+                    $data = array('message'=>'Sales order item is not available in this box.', 'status' => 0,'data'=>$pick_list_boxes);
+                }
+            }else{
+                $data = array('message'=>'Product is out of stock.', 'status' => 0);    
+            }    
+        }else{            
+            $data = array('message'=>'Scanned box is not valid.', 'status' => 0);
+        }        
+        echo json_encode($data);
+    }
+
+    function show_box_detail(){
+        $sales_order_id = $this->input->post('order_id');
+        $pick_list_box_no = $this->input->post('pick_list_box_no');
+        $delivery_date = $this->input->post('delivery_date');
+        //$delivery_date = date('Y-m-d');
+        $product_id = [];
+        $sales_order_qty=0;
+        $no_of_items = 0;
+
+        $pick_list_boxes = $this->Pick_list->box_list(array('store_id' => $this->store_id,'pick_list_box_no' => $pick_list_box_no,'result_type'=>$this->result_type));
+        
+        $data = [];
+        if(!empty($pick_list_boxes)){
+            
+            $box_product_id = $pick_list_boxes->product_id;
+            $box_detail_id = $pick_list_boxes->box_detail_id;
+
+            if($pick_list_boxes->remaining_item > 0){
+                $sales_order_product_location = $this->Pick_list->sales_order_product_location(array('store_id' => $this->store_id,'sales_order_id' => $sales_order_id));
+                if($sales_order_product_location){
+                    foreach($sales_order_product_location as $obj){
+                        $product_id[] = $obj->product_id;
+                        if($box_product_id == $obj->product_id){
+                            $sales_order_qty = $obj->quantity;
+                        }
+                    }
+                }
+                
+                if(in_array($box_product_id,$product_id)){
+                    $box_detail_html = '<div class="col-md-12 rm_cls"><h4>Box Detail: </h4></div>
+                    
+                    <div class="col-md-12 rm_cls"><div class="form-group"><label class="form-label">Category: </label><input class="form-control" name="category" id="category" value="'.$pick_list_boxes->category_name.'" readonly type="text"></div></div>
+                    
+                    <div class="col-md-12 rm_cls"><div class="form-group"><label class="form-label">Product Name: </label><input class="form-control" name="category" value="'.$pick_list_boxes->product_name.'" readonly type="text"></div></div>
+                    
+                    <div class="col-md-12 rm_cls"><div class="form-group"><label class="form-label">OEM: </label><input class="form-control" name="category" id="oem_id" value="'.$pick_list_boxes->company_name.'" readonly type="text"></div></div>
+                    
+                    <div class="col-md-12 rm_cls"><div class="form-group"><label class="form-label">Qty in Stock: </label><input class="form-control" name="category" id="remaining_item" value="'.$pick_list_boxes->remaining_item.'" readonly type="text"></div></div>
+                    
+                    <div class="col-md-12 rm_cls"><div class="form-group"><label class="form-label">Quantity: </label><input class="form-control" name="category" id="qty" value="" type="number" min="1"></div></div>
+
+                    <div class="col-md-12 rm_cls"><label class="form-label"></label><button class="btn-sm ripple btn-secondary add_pick_list_btn" type="button" onclick="add_to_pick_list()">Add to Pick List</button></div>
+                    ';
+                    $data = array('message'=>'', 'status' => 1,'data'=>$box_detail_html);
+                }else{
+                    $data = array('message'=>'Sales order item is not available in this box.', 'status' => 0,'data'=>$pick_list_boxes);
+                }
+            }else{
+                $data = array('message'=>'Product is out of stock.', 'status' => 0);    
+            }    
+        }else{            
+            $data = array('message'=>'Scanned box is not valid.', 'status' => 0);
+        }        
+        echo json_encode($data);
+    }
+
+    function save_box_detail(){
+        $sales_order_id = $this->input->post('order_id');
+        $pick_list_box_no = $this->input->post('pick_list_box_no');
+        $order_qty = $this->input->post('order_qty');
+        $remaining_item = $this->input->post('remaining_item');
+        $delivery_date = $this->input->post('delivery_date');
+        //$delivery_date = date('Y-m-d');
+        $product_id = [];
+        $sales_order_qty=0;
+        $no_of_items = 0;
+
+        $pick_list_boxes = $this->Pick_list->box_list(array('store_id' => $this->store_id,'pick_list_box_no' => $pick_list_box_no,'result_type'=>$this->result_type));
+        $data = [];
+        if(!empty($pick_list_boxes)){
+            
+            $box_product_id = $pick_list_boxes->product_id;
+            $box_detail_id = $pick_list_boxes->box_detail_id;
+
+            if($pick_list_boxes->remaining_item > 0){
+                $sales_order_product_location = $this->Pick_list->sales_order_product_location(array('store_id' => $this->store_id,'sales_order_id' => $sales_order_id));
+                if($sales_order_product_location){
+                    foreach($sales_order_product_location as $obj){
+                        $product_id[] = $obj->product_id;
+                        if($box_product_id == $obj->product_id){
+                            $sales_order_qty = $obj->quantity;
+                        }
+                    }
+                }
+                
+                if(in_array($box_product_id,$product_id)){
+                    //echo $sales_order_qty;
+                    //echo "test";
+                    //echo $pick_list_boxes->no_of_items;
+                    if($sales_order_qty <= $pick_list_boxes->remaining_item){
+                        $remaining_item = $pick_list_boxes->remaining_item - $sales_order_qty;
+                        //echo "1";
+                        $pick_list_qty = $sales_order_qty;
+                    }else{
+                        $pick_list_qty = $pick_list_boxes->remaining_item;
+                        $remaining_item = 0;
+                        //echo "2";
+                    }               
+
+                    $get_pick_list_item = $this->Pick_list->get_pick_list_item(array(
+                                                                                    'sales_order_id'=>$sales_order_id,
+                                                                                    'product_id'=>$box_product_id,
+                                                                                    )
+                                                                            );
+                    //pr($get_pick_list_item);
+                    if($get_pick_list_item){
+                        foreach($get_pick_list_item as $pObj){
+                            $no_of_items = $no_of_items + $pObj->no_of_items;
+                        }
+                    }
+                    //echo $no_of_items."<br>";
+                    //echo $sales_order_qty."<br>";exit;
+
+                    if(empty($get_pick_list_item) || ($no_of_items < $sales_order_qty)){ 
+                        
+                        if($no_of_items < $sales_order_qty){
+                            if($no_of_items == 0 && $pick_list_boxes->remaining_item < $sales_order_qty){
+                                $pick_list_qty = $pick_list_boxes->remaining_item;
+                                //$pick_list_qty = $sales_order_qty;
+                                //echo "3";
+                            }else if($no_of_items == 0 && $pick_list_boxes->remaining_item > $sales_order_qty){
+                                $pick_list_qty = $sales_order_qty;
+                            }else{
+                                $pick_list_qty = $sales_order_qty - $no_of_items;
+                                //echo "4";
+                            }
+                            $remaining_item = $pick_list_boxes->remaining_item - $pick_list_qty;
+                        }
+
+                        $update_remaining_item = $this->Pick_list->update_remaining_item(array('box_detail_id'=>$box_detail_id, 'remaining_item'=>$remaining_item));
+                        
+                        $add_pick_list_item = $this->Pick_list->add_pick_list_item(array(
+                                                                                'sales_order_id'=>$sales_order_id,
+                                                                                'product_id'=>$box_product_id,
+                                                                                'box_detail_id'=>$box_detail_id,
+                                                                                'no_of_items'=>$pick_list_qty,
+                                                                                'delivery_date'=>$delivery_date,
+                                                                                'created_by'=>$this->user_id
+                                                                                //'result_type'=>$this->result_type
+                                                                            )
+                                                                        );
+                        
+                        $box_detail_html = '<tr id="tr_'.$pick_list_boxes->box_no.'"><td>'.$pick_list_boxes->product_name.'</td>
+                        <td>'.$pick_list_boxes->box_no.'</td>
+                        <td>'.$pick_list_boxes->location_name.'</td>
+                        <td>'.$pick_list_qty.'</td>
+                        </tr>';
+                        //<td><button type="button" name="remove" onclick="remove_pick_list('.$add_pick_list_item.','.$sales_order_id.')" class="btn btn-sm btn-danger"><span class="fe fe-trash-2"> </span></button></td>
+                        $data = array('message'=>'', 'status' => 1,'data'=>$box_detail_html);
+                    }else{                    
+                        $data = array('message'=>'Pick list is already completed for this item.', 'status' => 0,'data'=>json_encode($pick_list_boxes));
+                    }
+
+                }else{
+                    $data = array('message'=>'Sales order item is not available in this box.', 'status' => 0,'data'=>$pick_list_boxes);
+                }
+            }else{
+                $data = array('message'=>'Product is out of stock.', 'status' => 0);    
+            }    
+        }else{            
+            $data = array('message'=>'Scanned box is not valid.', 'status' => 0);
+        }        
+        echo json_encode($data);
+    }
+
+    function dispatch_list(){
+        $this->data['dispatch_list'] = $this->Pick_list->dispatch_list(array('store_id' => $this->store_id));
+        $this->customer_option = $this->Options->customer_option();
+    }
+
+    function check_pick_list(){
+        $sales_order_id = $this->input->post('sales_order_id');
+        $customer_id = $this->input->post('customer_id');
+
+        //$sales_order_product_location = $this->Pick_list->sales_order_product_location(array('store_id' => $this->store_id,'sales_order_id' => $sales_order_id));
+
+        $sales_order = $this->Sales_order->list_sales_order(array('store_id' => $this->store_id,'customer_id'=>$customer_id,'sales_order_id' => $sales_order_id,'result_type'=>$this->result_type));
+        //pr($sales_order);
+        if($sales_order->sales_order_status_id != 6){
+
+            $sales_order_list = $this->Sales_order->sales_order_detail(array('store_id' => $this->store_id,'customer_id'=>$customer_id,'sales_order_id' => $sales_order_id));
+            
+            $get_pick_list_item = $this->Pick_list->dispatch_list(array('store_id' => $this->store_id,'sales_order_id'=>$sales_order_id));
+            $total_pick_item = 0;
+
+            if(!empty($get_pick_list_item)){
+                foreach($get_pick_list_item as $obj){
+                    $total_pick_item = $total_pick_item + $obj->no_of_items;
+                }
+            }
+
+            $total_sales_item = 0;
+            if(!empty($sales_order_list)){
+                foreach($sales_order_list as $sObj){
+                    $total_sales_item = $total_sales_item + $sObj->quantity;
+                }
+            }
+                        
+            if($total_pick_item == 0){
+                $data = array('message'=>'Please add all items in pick list.', 'status' => 0);                
+            }else if($total_pick_item > 0 && $total_pick_item < $total_sales_item){
+                $data = array('message'=>'Some items are not added in pick list.', 'status' => 0);
+            }else if($total_pick_item > 0 && $total_pick_item == $total_sales_item){
+                $update_sales_order_status = $this->Sales_order->update_sales_order(array('store_id' => $this->store_id,'sales_order_id'=>$sales_order_id, 'sales_order_status_id'=>6));
+                //echo $this->db->last_query();exit;
+                $data = array('message'=>'', 'status' => 1);
+            }            
+        }else{
+            $data = array('message'=>'Pick list already created.', 'status' => 0);
+        }
+
+        echo json_encode($data);
+    }
+}

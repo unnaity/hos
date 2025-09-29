@@ -1,0 +1,70 @@
+<!-- Main Content-->
+<div class="main-content pt-0">
+	<div class="side-app">
+		<div class="main-container container-fluid">
+			<!-- Page Header -->
+			<div class="page-header" style="min-height:unset;">
+				<h3 class="text-start" ><?php echo UCFIRST($this->class_name); ?> List</h3>
+				<div class="btn btn-list">
+					<a class="btn ripple btn-secondary" href="#" title="Download"><i class="fe fe-download"></i></a>				
+					<a class="btn ripple btn-success" href="<?php echo BASE_URL.'add-customer'?>" title="Add Customer"><i class="fe fe-plus"></i></a>
+				</div>
+			</div>
+			<!-- End Page Header -->
+			<?php $this->load->view('Backend/Elements/success-message.php'); ?>
+			<!-- Row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card custom-card">
+						<div class="card-body">
+							
+							<div class="table-responsive">
+								<table id="example2" class="table table-striped table-bordered text-nowrap" style="border-left:1px solid #e1e6f1;">
+									<thead>
+										<tr>
+											<th>Company Name</th>
+											<th>Customer Name</th>
+											<th>Display Name</th>
+											<th>Email</th>
+											<th>Contact No.</th>
+											<th>Billing Add.</th>
+											<th>Shipping Add.</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+									<?php if(isset($customer_list)):
+										foreach($customer_list as $obj): ?>
+										<tr>
+											<td><?php echo $obj->company_name ?></td>
+											<td><?php echo $obj->first_name.' '.$obj->last_name ?></td>
+											<td><?php echo $obj->display_name ?></td>
+											<td><?php echo $obj->email ?></td>
+											<td><?php echo $obj->mobile_no ?></td>
+											<td><?php echo $obj->billing_address ?></td>
+											<td><?php echo $obj->shipping_address ?></td>
+											<td>
+												<button id="bDel" type="button" class="btn  btn-sm btn-danger"><span class="fe fe-trash-2"> </span></button>
+											</td>
+										</tr>
+									<?php endforeach;
+									else: echo "<tr><td colspan='9'>No record found!</td></tr>";
+									endif;
+									?>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Row -->
+		</div>
+	</div>
+</div>
+<!-- End Main Content-->
+<Style>
+	.table.dataTable th, .table.dataTable td{ font-size:12px; font-weight:500; }
+	.dataTables_length{ display:none;}
+</style>

@@ -1,0 +1,9 @@
+<?php if($this->session->flashdata('success_message')): ?>
+    <div class="alert alert-success alert-dismissible fade show text-start" role="alert">
+        <span class="alert-inner--icon"><i class="fe fe-thumbs-up"></i></span>
+        <span class="alert-inner--text"><strong>Success !</strong> <?php echo $this->session->flashdata('success_message'); ?></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+<?php endif; ?>

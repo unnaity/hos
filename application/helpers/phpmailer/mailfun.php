@@ -1,0 +1,30 @@
+<?
+require("class.phpmailer.php");
+
+$mail = new phpmailer;
+
+$mail->IsSMTP(); // set mailer to use SMTP
+$mail->From = "admin@instaxs.net";
+$mail->FromName = "Mailer";
+$mail->Host = "mail.instaxs.net,mail.instaxs.net"; // specify main and backup server
+$mail->AddAddress("subson@instaxs.net","subson"); 
+$mail->AddAddress("anuj@instaxs.net"); // name is optional
+$mail->AddReplyTo("anmol@instaxs.net","Information");
+$mail->WordWrap = 50; // set word wrap
+//$mail->AddAttachment("/var/tmp/file.tar.gz"); // add attachments
+//$mail->AddAttachment("/tmp/image.jpg", "new.jpg"); // optional name
+$mail->IsHTML(true); // set email format to HTML
+$mail->Subject = "Here is the subject";
+$mail->Body = "hi everybody";
+
+if(!$mail->Send())
+{
+echo "Message was not sent <p>";
+echo "Mailer Error: " . $mail->ErrorInfo;
+exit;
+}
+else
+{
+	echo "bye";
+}
+?>

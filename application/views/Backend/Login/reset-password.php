@@ -1,0 +1,33 @@
+<!-- Page -->
+<div class="page main-signin-wrapper">
+
+	<!-- Row -->
+	<div class="row text-center ps-0 pe-0 ms-0 me-0">
+		<div class="col-xl-5 col-lg-5 col-md-5 d-block mx-auto">
+			<?php $this->load->view('Backend/Login/logo.php'); ?>
+			<div class="card custom-card">
+				<div class="card-body pd-45">
+					<h3 class="text-center">Reset Your Password</h3>
+					<form>
+						<div class="form-group text-start">
+							<label>Email</label>
+							<input class="form-control" placeholder="Enter your email" type="text">
+						</div>
+						<div class="form-group text-start">
+							<label>New Password</label>
+							<input class="form-control" placeholder="Enter your password" type="password">
+						</div>
+						<div class="form-group text-start">
+							<label>Confirm Password</label>
+							<input class="form-control" placeholder="Enter your password" type="password">
+						</div>
+						<button class="btn ripple btn-main-primary btn-block">Reset Password</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Row -->
+
+</div>
+<!-- End Page -->

@@ -1,0 +1,1 @@
+ALTER TABLE `tbl_raw_material` ADD `sustainability_score` VARCHAR(255) NULL DEFAULT NULL AFTER `subcategory_id`, ADD `weight` FLOAT(10,2) NULL DEFAULT NULL AFTER `sustainability_score`;

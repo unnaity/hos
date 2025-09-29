@@ -1,0 +1,212 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Products_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+    function add_product($input){
+		$product_id = $input['product_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$oem_id = $input['oem_id'] ?? 0;
+		$model = $input['model'] ?? NULL;
+		$quality = $input['quality'] ?? NULL;
+		$size = $input['size'] ?? NULL;
+		$product_sku = $input['product_sku'] ?? NULL;
+		$hsn_code = $input['hsn_code'] ?? NULL;
+		$article_code = $input['article_code'] ?? NULL;
+		$unit_id = $input['unit_id'] ?? 0;		
+		$product_name = $input['product_name'] ?? NULL;
+		$additional_info = $input['additional_info'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;		
+		$created_date = date('Y-m-d H:i:s');
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$product_id = $this->Common_model->callSP("SAVE_PRODUCT(".$product_id.",'".$category_id."','".$oem_id."','".$model."','".$quality."','".$size."','".$product_sku."','".$hsn_code."','".$article_code."','".$unit_id."','".$product_name."','".$additional_info."','".$is_deleted."','".$created_by."','".$created_date."')","row");
+		
+		return $product_id;
+	}
+
+	function list_product($input){
+		$product_id = $input['product_id'] ?? 0;
+		$product_name = $input['product_name'] ?? 'NULL';
+		$oem_id = $input['oem_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$sku = $input['sku'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$product_list = $this->Common_model->callSP("GET_PRODUCT_LIST(".$product_id.",".$product_name.",".$oem_id.",".$category_id.",".$sku.")",$result_type);
+		return $product_list;
+	}
+
+	function list_variant($input){
+		$variant_id = $input['variant_id'] ?? 0;
+		$variant_title = $input['variant_title'] ?? NULL;
+		$result_type = $input['result_type'] ?? '';
+		$variant_list = $this->Common_model->callSP("GET_VARIANT_LIST(".$variant_id.",'".$variant_title."')", $result_type);
+		return $variant_list;
+	}
+
+	function add_variant($input){
+		$variant_title = $input['variant_title'] ?? NULL;
+		$variant_slug = $input['variant_slug'] ?? NULL;
+		$variant_option = $input['variant_option'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$row_type = $input['row_type'] ?? 'row';
+
+		$variant_id = $this->Common_model->callSP("SAVE_VARIANT('".$variant_title."','".$variant_slug."','".$variant_option."',".$created_by.")", $row_type);
+		return $variant_id;
+	}
+
+	function add_product_grn($input){
+		$store_id = $input['store_id'] ?? 0;
+		$product_grn_id = $input['product_grn_id'] ?? 0;
+		$is_quality_checked = $input['is_quality_checked'] ?? 0;
+		$product_grn_no = $input['product_grn_no'] ?? NULL;
+		$grn_type_id = $input['grn_type_id'] ?? 0;
+		$additional_info = $input['additional_info'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? 'row';
+
+		$product_grn = $this->Common_model->callSP("SAVE_PRODUCT_GRN(".$store_id.",".$product_grn_id.",'".$product_grn_no."','".$is_quality_checked."','".$additional_info."',".$created_by.",'".$grn_type_id."')", $result_type);
+		return $product_grn;
+	}
+
+	function add_product_grn_detail($input){
+		//pr($input);exit;
+		$product_grn_id = $input['product_grn_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;		
+		$product_id = $input['product_id'] ?? 0;
+		$no_of_boxes = $input['no_of_boxes'] ?? 0;
+		$no_of_items = $input['no_of_items'] ?? 0;
+		$bill_no = !empty($input['bill_no']) ? $input['bill_no'] : 0;
+		$po_date = $input['po_date'] ?? NULL;
+		$mfg_date = $input['mfg_date'] ?? NULL;
+		$expiry_date = $input['expiry_date'] ?? NULL;
+		$part_code = $input['part_code'] ?? NULL;
+		$packing = $input['packing'] ?? 0 ;
+		$serial_no = $input['serial_no'] ?? NULL;
+		$lot_no = $input['lot_no'] ?? NULL;
+		$supplier_id = $input['supplier_id'] ?? 0;
+		$invoice_type = $input['invoice_type'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? 'row';
+		$product_grn_detail = $this->Common_model->callSP("SAVE_GRN_DETAIL(".$product_grn_id.",".$supplier_id.",'".$po_date."',".$category_id.",'".$invoice_type."','".$bill_no."',".$product_id.",'".$mfg_date."','".$expiry_date."',".$no_of_boxes.",".$no_of_items.",".$created_by.",'".$part_code."','".$serial_no."','".$lot_no."',".$packing.")", $result_type);
+		//pr($product_grn_detail);exit;
+		//echo $this->db->last_query();exit;
+		return $product_grn_detail;
+	}
+
+	function add_product_quality_check($input) {
+		$product_grn_detail_id = $input['product_grn_detail_id'] ?? 0;
+		$no_of_boxes = $input['no_of_boxes'] ?? 0;
+		$quality_checked_item = $input['quality_checked_item'] ?? 0; 
+		$purchase_price_per_item = $input['purchase_price_per_item'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? 'row';
+
+		$product_grn_detail = $this->Common_model->callSP("SAVE_PRODUCT_QUALITY_CHECK(".$product_grn_detail_id.",".$no_of_boxes.",".$quality_checked_item.",".$purchase_price_per_item.",".$created_by.")", $result_type);
+		
+		return $product_grn_detail;
+	}
+
+	function add_box_detail($input){
+		$store_id = $input['store_id'] ?? 0;
+		$product_grn_id = $input['product_grn_id'] ?? NULL;
+		$product_grn_detail_id = $input['product_grn_detail_id'] ?? 0;		
+		$product_id = $input['product_id'] ?? 0;
+		$box_no = $input['box_no'] ?? NULL;
+		$no_of_items = $input['no_of_items'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? 'row';
+
+		$product_grn_detail = $this->Common_model->callSP("SAVE_BOX_DETAIL(".$store_id.",".$product_id.",".$product_grn_id.",".$product_grn_detail_id.",'".$box_no."',".$no_of_items.",".$created_by.")", $result_type);
+		return $product_grn_detail;
+	}
+	
+	function list_product_grn($input){
+		$store_id = $input['store_id'] ?? 0;
+		$product_grn_id = $input['product_grn_id'] ?? 0;
+		$product_grn_detail_id = $input['product_grn_detail_id'] ?? 0;
+		$product_grn_no = $input['product_grn_no'] ?? 'NULL';		
+		$product_name = $input['product_name'] ?? 'NULL';
+		$is_quality_checked = $input['is_quality_checked'] ?? 0;
+		$grn_from_date = $input['grn_from_date'] ?? 'NULL';		
+		$grn_to_date = $input['grn_to_date'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+
+		$product_grn_list = $this->Common_model->callSP("GET_PRODUCT_GRN_LIST(".$store_id.",".$product_grn_id.",".$product_grn_detail_id.",".$product_grn_no.",".$product_name.",".$grn_from_date.",".$grn_to_date.",'".$is_quality_checked."')", $result_type);
+		
+		return $product_grn_list;
+	}
+	
+	function list_box($input){
+		$store_id = $input['store_id'] ?? 0;
+		$box_id = $input['box_id'] ?? 0;
+		$box_no = $input['box_no'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$box_detail = $this->Common_model->callSP("GET_BOX_LIST(".$box_id.",".$box_no.",".$store_id.")", $result_type);
+		return $box_detail;
+	}
+
+	function create_put_away($input){
+		$store_id = $input['store_id'] ?? 0;
+		$location_no = $input['location_no'] ?? 0;
+		$box_no = $input['box_no'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$created_by = $input['created_by'] ?? 0;
+		$box_detail = $this->Common_model->callSP("SAVE_RM_BOX_LOCATION(".$store_id.",".$location_no.",".$box_no.",".$created_by.")", $result_type);
+		return $box_detail;
+	}
+
+	function list_box_location($input){
+		$box_location_id = $input['box_location_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$location_no = $input['location_no'] ?? 0;
+		$box_no = $input['box_no'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$box_detail = $this->Common_model->callSP("GET_BOX_LOCATION(".$box_location_id.",".$store_id.",".$box_no.",".$location_no.")", $result_type);
+		return $box_detail;
+	}
+
+	function add_product_alias($input){
+		$product_alias_id = $input['product_alias_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$product_id = $input['product_id'] ?? 0;
+		$product_name = $input['product_name'] ?? 'NULL';
+		$created_by = $input['created_by'] ?? 0;		
+		$created_date = date('Y-m-d H:i:s');
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$product_alias_list = $this->Common_model->callSP("SAVE_PRODUCT_ALIAS(".$product_alias_id.",".$store_id.",".$product_id.",'".$product_name."','".$is_deleted."',".$created_by.")",$result_type);
+		return $product_alias_list;
+	}
+
+	function product_alias_list($input){
+		$product_alias_id = $input['product_alias_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$product_id = $input['product_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$product_alias_list = $this->Common_model->callSP("GET_PRODUCT_ALIAS_LIST(".$product_alias_id.",".$store_id.",".$product_id.")",$result_type);
+		return $product_alias_list;
+	}
+
+	function put_away_list($input){
+		$store_id = $input['store_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$put_away_list = $this->Common_model->callSP("GET_PUT_AWAY_LIST(".$store_id.")",$result_type);
+		return $put_away_list;
+	}
+
+	function get_grn_list($input){
+		$store_id = $input['store_id'] ?? 0;
+		$is_quality_checked = $input['is_quality_checked'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$get_grn_list = $this->Common_model->callSP("GET_GRN_LIST(".$store_id.",'".$is_quality_checked."')", $result_type);
+		return $get_grn_list;
+	}
+
+	function update_purchase_price($input){		
+		return $updateVal =  $this->Common_model->updateValue(array('purchase_price_per_item'=>$input['purchase_price_per_item']),'tbl_product_grn_detail',array('product_grn_detail_id'=>$input['product_grn_detail_id']));
+	}
+}
+

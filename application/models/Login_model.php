@@ -1,0 +1,16 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Login_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+    
+    function get_user_login($input){
+        $email = $input['email'] ?? 'NULL';
+        $result_type = $input['result_type'] ?? '';
+		return $user_detail = $this->Common_model->callSP("GET_USER_LOGIN('".$email."')",$result_type);
+    }
+}
+

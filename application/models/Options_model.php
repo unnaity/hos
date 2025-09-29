@@ -1,0 +1,328 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Options_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();        
+        $this->load->model('Purchase_order_model','Purchase_order');
+    }
+    
+    function supplier_option($input){
+
+        $supplier_id = $input['supplier_id'] ?? 0;
+		$company_name = $input['company_name'] ?? 'NULL';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $is_oem = $input['is_oem'] ?? 0;
+		$supplier_list = $this->Common_model->callSP("GET_SUPPLIER_LIST(".$supplier_id.",".$company_name.",'".$is_oem."')","");		
+
+        $supplier_option = '';        
+        if($supplier_list){
+            foreach($supplier_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->supplier_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $supplier_option .= '<option value="'.$obj->supplier_id.'" '.$is_selected.'>'.$obj->company_name.'</option>';
+            }
+        }
+        return $supplier_option;
+    }
+
+    function branch_option($input){        
+        $client_id = $input['client_id'] ?? $this->user_detail->client_id;
+        $branch_id = $input['branch_id'] ?? 0;
+		$branch_name = $input['branch_name'] ?? 'NULL';
+        $legal_name = $input['legal_name'] ?? 'NULL';
+        $main_branch = $input['main_branch'] ?? 'NULL';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $result_type = $input['result_type'] ?? '';
+		$branch_list = $this->Common_model->callSP("GET_BRANCH_LIST(".$client_id.",".$branch_id.",".$branch_name.",".$legal_name.",'".$main_branch."')",$result_type);		
+        $branch_option = '';        
+        if($branch_list){
+            foreach($branch_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->branch_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $branch_option .= '<option value="'.$obj->branch_id.'" '.$is_selected.'>'.$obj->branch_name.'</option>';
+            }
+        } 
+        return $branch_option;
+    }
+
+    function store_option($input){
+        $store_id = $input['store_id'] ?? 0;
+		$branch_id = $input['branch_id'] ?? 0;
+		$store_name = $input['store_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$store_list = $this->Common_model->callSP("GET_STORE_LIST(".$store_id.",".$branch_id.",".$store_name.")",$result_type);
+        $store_option = '';        
+        if($store_list){
+            foreach($store_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->store_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $store_option .= '<option value="'.$obj->store_id.'" '.$is_selected.'>'.$obj->store_name.'</option>';
+            }
+        } 
+        return $store_option;
+    }
+
+    function cateory_wise_product_list($input){
+		$product_id = $input['product_id'] ?? 0;
+		$product_name = $input['product_name'] ?? 'NULL';
+		$supplier_id = $input['supplier_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$sku = $input['sku'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$product_list = $this->Common_model->callSP("GET_PRODUCT_LIST(".$product_id.",".$product_name.",".$supplier_id.",".$category_id.",".$sku.")",$result_type);
+		
+        $product_option = '';        
+        $product_option .= '<option value="">Select Product</option>';
+        if($product_list){
+            foreach($product_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->product_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $product_option .= '<option value="'.$obj->product_id.'" '.$is_selected.' data-unit="'.$obj->unit.'">'.$obj->product_name.'</option>';
+            }
+        }    
+        $product_option .= '';        
+        return $product_option;
+	}
+
+    function category_option($input=NULL){
+        $category_id = $input['category_id'] ?? 0;		
+		$category_name = $input['category_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$category_list = $this->Common_model->callSP("GET_CATEGORY(".$category_id.",".$category_name.")",$result_type);
+        $category_option = '';        
+        if($category_list){
+            foreach($category_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->category_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $category_option .= '<option value="'.$obj->category_id.'" data-hsn="'.$obj->hsn_code.'" '.$is_selected.'>'.$obj->name.'</option>';
+            }
+        } 
+        return $category_option;
+    }
+
+    function customer_option($input=NULL){
+        $customer_id = $input['customer_id'] ?? 0;		
+		$company_name = $input['company_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$customer_list = $this->Common_model->callSP("GET_CUSTOMER_LIST(".$customer_id.",".$company_name.")",$result_type);
+        $customer_option = '';        
+        if($customer_list){
+            foreach($customer_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->customer_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $customer_option .= '<option value="'.$obj->customer_id.'" '.$is_selected.'>'.$obj->company_name.'</option>';
+            }
+        } 
+        return $customer_option;
+    }
+
+    function uom_option($input=NULL){
+        $unit_id = $input['unit_id'] ?? 0;		
+		$unit = $input['unit'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$uom_list = $this->Common_model->callSP("GET_UNIT_OF_MEASURE_LIST(".$unit_id.",".$unit.")",
+        $result_type);
+        // echo $this->db->last_query();exit;
+        $uom_option = '';        
+        if($uom_list){
+            foreach($uom_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->unit_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $uom_option .= '<option value="'.$obj->unit_id.'" '.$is_selected.'>'.$obj->unit.'</option>';
+            }
+        } 
+        return $uom_option;
+    }
+
+    function size_option($input=NULL){        
+        $size_id = $input['size_id'] ?? 0;
+        $store_id = $input['store_id'] ?? 0;
+		$size = $input['size'] ?? 'NULL';
+        $category_id = $input['category_id'] ?? 0;
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $result_type = $input['result_type'] ?? '';
+		$size_list = $this->Common_model->callSP("GET_SIZE_LIST(".$size_id.",".$store_id.",".$category_id.",".$size.")",$result_type);
+        $size_option = '';        
+        if($size_list){
+            foreach($size_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->size_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $size_option .= '<option value="'.$obj->size_id.'" '.$is_selected.'>'.$obj->size.'</option>';
+            }
+        } 
+        return $size_option;
+    }
+
+    function model_option($input=NULL){        
+        $model_id = $input['model_id'] ?? 0;
+        $store_id = $input['store_id'] ?? 0;
+		$model = $input['model'] ?? 'NULL';
+        $category_id = $input['category_id'] ?? 0;
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $result_type = $input['result_type'] ?? '';
+		$model_list = $this->Common_model->callSP("GET_MODEL_LIST(".$model_id.",".$store_id.",".$category_id.",".$model.")",$result_type);
+        $model_option = '';        
+        if($model_list){
+            foreach($model_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->model_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $model_option .= '<option value="'.$obj->model_id.'" '.$is_selected.'>'.$obj->model.'</option>';
+            }
+        } 
+        return $model_option;
+    }
+
+    function quality_option($input=NULL){        
+        $quality_id = $input['quality_id'] ?? 0;
+        $store_id = $input['store_id'] ?? 0;
+		$quality = $input['quality'] ?? 'NULL';
+        $category_id = $input['category_id'] ?? 0;
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $result_type = $input['result_type'] ?? '';
+		$quality_list = $this->Common_model->callSP("GET_QUALITY_LIST(".$quality_id.",".$store_id.",".$category_id.",".$quality.")",$result_type);
+        $quality_option = '';        
+        if($quality_list){
+            foreach($quality_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->quality_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $quality_option .= '<option value="'.$obj->quality_id.'" '.$is_selected.'>'.$obj->quality.'</option>';
+            }
+        } 
+        return $quality_option;
+    }
+
+    function get_client_list($input){
+        $client_id = $input['client_id'] ?? 0;
+
+        if($client_id == 0){
+            $result_type = '';
+        }else{
+            $result_type = 'row';
+        }
+		return $client_list = $this->Common_model->callSP("GET_CLIENT_LIST(".$client_id.")",$result_type);	
+    }    
+    
+    function product_alias_list($input){
+        $product_alias_id = $input['product_alias_id'] ?? 0;
+        $store_id = $input['store_id'] ?? 0;
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $product_id = $input['product_id'] ?? 0;
+        $result_type = $input['result_type'] ?? '';
+        $product_alias_list = $this->Common_model->callSP("GET_PRODUCT_ALIAS_LIST(".$product_alias_id.",".$store_id.",".$product_id.")",$result_type);
+
+        $product_alias_option = '<option value="">Choose one</option>';        
+        if($product_alias_list){
+            foreach($product_alias_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->product_alias_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $product_alias_option .= '<option value="'.$obj->product_alias_id.'" '.$is_selected.'>'.$obj->product_alias_name.'</option>';
+            }
+        } 
+        return $product_alias_option;
+    }
+
+    function employee_option($input){
+		$employee_id = $input['employee_id'] ?? 0;
+        $store_id = $input['store_id'] ?? 0;
+        $department_id = $input['department_id'] ?? 0;
+		$employee_name = $input['employee_name'] ?? 'NULL';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$employee_list = $this->Employee->list_employee($input);
+        
+        $employee_option = '';
+        $employee_option .= '<option value="">Select Employee</option>';
+        if($employee_list){
+            foreach($employee_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->employee_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $employee_option .= '<option value="'.$obj->employee_id.'" '.$is_selected.'>'.$obj->employee_name.'</option>';
+            }
+        } 
+        return $employee_option;
+	}
+
+    function department_option($input=NULL){
+		$department_id = $input['department_id'] ?? 0;
+		$department_name = $input['department_name'] ?? 'NULL';
+        $selected_value = $input['selected_value'] ?? 'NULL';
+		$department_list = $this->Settings->list_department($input);        
+        $department_option = '';        
+        if($department_list){
+            foreach($department_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->department_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $department_option .= '<option value="'.$obj->department_id.'" '.$is_selected.'>'.$obj->department_name.'</option>';
+            }
+        } 
+        return $department_option;		
+	}
+
+    function po_option($input){
+        $store_id = $input['store_id'] ?? 0;
+        $selected_value = $input['selected_value'] ?? 'NULL';
+        $purchase_order_list = $this->Purchase_order->list_purchase_order(array('store_id' => $this->store_id));
+
+        $po_option = '';        
+        if($purchase_order_list){
+            foreach($purchase_order_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->purchase_order_id){
+                    $is_selected = 'selected="selected"';
+                }
+                $po_option .= '<option value="'.$obj->purchase_order_id.'" '.$is_selected.'>'.$obj->purchase_order_no.'</option>';
+            }
+        } 
+        return $po_option;
+    }
+    function occupied_location_option($input = NULL){        
+        $selected_value = $input['selected_value'] ?? 'NULL';
+
+        $location_list = $this->Common_model->occupied_location_list(array('store_id' => $this->store_id));
+
+        $location_option = '';        
+        if($location_list){
+            foreach($location_list as $obj){
+                $is_selected = '';
+                if($selected_value == $obj->location_no){
+                    $is_selected = 'selected="selected"';
+                }
+                $location_option .= '<option value="'.$obj->location_no.'" '.$is_selected.'>'.$obj->location_name.'</option>';
+            }
+        } 
+        return $location_option;
+    }
+}
+

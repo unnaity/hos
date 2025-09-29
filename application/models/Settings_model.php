@@ -1,0 +1,417 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Settings_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+    function add_category($input){
+		$category_id = $input['category_id'] ?? 0;
+		$category_name = $input['category_name'] ?? NULL;
+		$slug = $input['slug'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$hsn_code = $input['hsn_code'] ?? NULL;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';		
+		$category_id = $this->Common_model->callSP("SAVE_CATEGORY('".$category_id."','".$category_name."','".$slug."','".$hsn_code."','".$is_deleted."',".$created_by.")",$result_type);
+		return $category_id;
+	}
+
+	function list_category($input){
+		$category_id = $input['category_id'] ?? 0;
+		$category_name = $input['category_name'] ?? NULL;
+		$category_list = $this->Common_model->callSP("GET_CATEGORY(".$category_id.",'".$category_name."')","");
+		return $category_list;
+	}
+	function add_subcategory($input){
+		$subcategory_id = $input['subcategory_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$subcategory = $input['subcategory'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$subcategory_id = $this->Common_model->callSP("SAVE_SUBCATEGORY(".$subcategory_id.",".$store_id.",".$category_id.",'".$subcategory."','".$is_deleted."',".$created_by.")",$result_type);
+		
+		return $subcategory_id;
+	}
+
+	function list_subcategory($input){
+		$subcategory_id = $input['subcategory_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$subcategory = $input['subcategory'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$subcategory_list = $this->Common_model->callSP("GET_SUBCATEGORY_LIST(".$subcategory_id.",".$store_id.",".$category_id.",".$subcategory.")",$result_type);
+		return $subcategory_list;
+	}
+
+	/******** Size ****** */
+
+	function add_size($input){
+		$size_id = $input['size_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$size = $input['size'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$size_id = $this->Common_model->callSP("SAVE_SIZE(".$size_id.",".$store_id.",".$category_id.",'".$size."','".$is_deleted."',".$created_by.")",$result_type);
+		return $size_id;
+	}
+
+	function list_size($input){
+		$size_id = $input['size_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$size = $input['size'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$size_list = $this->Common_model->callSP("GET_SIZE_LIST(".$size_id.",".$store_id.",".$category_id.",".$size.")",$result_type);
+		return $size_list;
+	}
+
+	/******** Model ****** */
+
+	function add_model($input){
+		$model_id = $input['model_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$model = $input['model'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$model_id = $this->Common_model->callSP("SAVE_MODEL(".$model_id.",".$store_id.",".$category_id.",'".$model."','".$is_deleted."',".$created_by.")",$result_type);
+		return $model_id;
+	}
+
+	function list_model($input){
+		$model_id = $input['model_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$model = $input['model'] ?? NULL;
+		$result_type = $input['result_type'] ?? '';
+		$model_list = $this->Common_model->callSP("GET_MODEL_LIST(".$model_id.",".$store_id.",".$category_id.",'".$model."')",$result_type);
+		return $model_list;
+	}
+
+	/********Quality****** */
+
+	function add_quality($input){
+		
+		$quality_id = $input['quality_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$quality = $input['quality'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$quality_id = $this->Common_model->callSP("SAVE_QUALITY(".$quality_id.",".$store_id.",".$category_id.",'".$quality."','".$is_deleted."',".$created_by.")",$result_type);
+		//echo $this->db->last_query();exit;
+		return $quality_id;
+	}
+
+	function list_quality($input){
+		$quality_id = $input['quality_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$category_id = $input['category_id'] ?? 0;
+		$quality = $input['quality'] ?? NULL;
+		$result_type = $input['result_type'] ?? '';
+		$quality_list = $this->Common_model->callSP("GET_QUALITY_LIST(".$quality_id.",".$store_id.",".$category_id.",'".$quality."')",$result_type);
+		return $quality_list;
+	}
+
+	/********Unit****** */
+
+	function add_units_of_measure($input){
+		$unit_id = $input['unit_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$unit = $input['unit'] ?? NULL;			
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		
+		$unit_detail = $this->Common_model->callSP("SAVE_UNIT_OF_MEASURE(".$unit_id.",".$store_id.",'".$unit."','".$is_deleted."',".$created_by.")","row");
+		return $unit_detail;
+	}
+
+	function list_units_of_measure($input){
+		$unit_id = $input['unit_id'] ?? 0;
+		$unit = $input['unit'] ?? 'NULL';
+		$unit_list = $this->Common_model->callSP("GET_UNIT_OF_MEASURE_LIST(".$unit_id.",".$unit.")","");
+		return $unit_list;
+	}
+
+	/******** Operation ****** */
+
+	function add_operations(){
+		$operations = trim($this->input->post('operations'));
+		$created_by = 1;
+		$operations_detail = $this->Common_model->callSP("SAVE_OPERATION('".$operations."',".$created_by.")","row");
+		return $operations_detail;
+	}
+
+	function list_operations($input){
+		$operation_id = $input['operation_id'] ?? 0;
+		$operation_name = $input['operation_name'] ?? 'NULL';
+		$operations_list = $this->Common_model->callSP("GET_OPERATIONS_LIST(".$operation_id.",".$operation_name.")","");
+		return $operations_list;
+	}
+
+	/******** Branches ****** */
+
+	function add_branches($input=NULL){
+		$branch_id = $input['branch_id'] ?? 0;
+		$branch_name = $input['branch_name'] ?? 0;
+		$legal_name = $input['legal_name'] ?? 0;
+		$address = $input['address'] ?? 0;
+		$sell = $input['sell'] ?? 0;
+		$make = $input['make'] ?? 0;
+		$buy = $input['buy'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$client_id = $input['client_id'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+
+		$branchess_detail = $this->Common_model->callSP("SAVE_BRANCH(".$branch_id.",'".$client_id."','".$branch_name."','".$legal_name."','".$address."','".$sell."','".$make."','".$buy."','".$is_deleted."',".$created_by.")","row");
+		return $branchess_detail;
+	}
+
+	function list_branches($input){
+		$client_id = $input['client_id'] ?? 0;
+		$branch_id = $input['branch_id'] ?? 0;
+		$branch_name = $input['branch_name'] ?? 'NULL';
+		$legal_name = $input['legal_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$main_branch = $input['main_branch'] ?? 0;		
+		$branch_list = $this->Common_model->callSP("GET_BRANCH_LIST(".$client_id.",".$branch_id.",".$branch_name.",".$legal_name.",'".$main_branch."')",$result_type);
+		return $branch_list;
+	}
+
+	function add_tax_rate(){
+		$tax_name = trim($this->input->post('tax_name'));
+		$tax_rate = trim($this->input->post('tax_rate'));
+		$tax_id = 0;
+		$created_by = 1;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$tax_rate_detail = $this->Common_model->callSP("SAVE_TAX_RATE(".$tax_id.", '".$tax_name."','".$tax_rate."',".$created_by.",'".$is_deleted."')","row");
+		return $tax_rate_detail;
+	}
+
+	function list_tax_rate($input){
+		$tax_id = $input['tax_id'] ?? 0;
+		$tax_name = $input['tax_name'] ?? NULL;
+		$tax_rate = $input['tax_rate'] ?? NULL;
+		$tax_rate_list = $this->Common_model->callSP("GET_TAX_RATE_LIST(".$tax_id.")","");
+		return $tax_rate_list;
+	}
+
+	function add_default_tax_rate(){
+		$sales_order = trim($this->input->post('sales_order'));
+		$purchase_order = trim($this->input->post('purchase_order'));
+		$created_by = 1;
+		
+		$tax_rate_detail = $this->Common_model->callSP("SAVE_DEFAULT_TAX(".$sales_order.", ".$purchase_order.",".$created_by.")","row");
+		return $tax_rate_detail;
+	}
+	
+	function get_currency_list() {
+		$currency_id = $input['tax_id'] ?? 0;
+		$currency_code = $input['currency_code'] ?? NULL;		
+
+		$currency_list = $this->Common_model->callSP("GET_CURRENCY_CODE_LIST(".$currency_id.",'".$currency_code."')","");
+		return $currency_list;
+	}
+
+	function general() {
+		$settings_id = 1;
+		$currency_code_id = trim($this->input->post('currency_code_id'));
+		$sales_order = trim($this->input->post('sales_order'));
+		$purchase_order = trim($this->input->post('purchase_order'));
+		$created_by = 1;
+		
+		$general_detail = $this->Common_model->callSP("UPDATE_GENERAL_SETTING(".$settings_id.", ".$currency_code_id.",".$sales_order.", ".$purchase_order.")","row");
+		return $general_detail;
+	}
+
+	function get_general_setting(){
+		$settings_id = 1;
+		$general_detail = $this->Common_model->callSP("GET_GENERAL_SETTING(".$settings_id.")","row");
+		return $general_detail;
+	}
+
+	function add_store($input){
+		$store_id = $input['store_id'] ?? 0;
+		$store_name = $input['store_name'] ?? NULL;
+		$branch_id = $input['branch_id'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$store_id = $this->Common_model->callSP("SAVE_STORE(".$store_id.",".$branch_id.",'".$store_name."',".$created_by.",'".$is_deleted."')","row");
+		
+		return $store_id;
+	}
+
+	function list_store($input){
+		$store_id = $input['store_id'] ?? 0;
+		$branch_id = $input['branch_id'] ?? 0;
+		$store_name = $input['store_name'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		$store_list = $this->Common_model->callSP("GET_STORE_LIST(".$store_id.",".$branch_id.",".$store_name.")",$result_type);
+		return $store_list;
+	}
+
+	function add_package_type($input){		
+		$package_type = $input['package_type'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$package_type_id = $this->Common_model->callSP("SAVE_PACKAGE_TYPE('".$package_type."',".$created_by.")","row");
+		return $package_type_id;
+	}
+
+	function list_package_type($input){
+		$package_type_id = $input['package_type_id'] ?? 0;		
+		$package_type = $input['package_type'] ?? 'NULL';
+		$package_type_list = $this->Common_model->callSP("GET_PACKAGE_TYPE_LIST(".$package_type_id.",".$package_type.")","");
+		return $package_type_list;
+	}
+
+	function add_trolley_type($input){		
+		$trolley_type = $input['trolley_type'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$trolley_type_id = $this->Common_model->callSP("SAVE_TROLLEY_TYPE('".$trolley_type."',".$created_by.")","row");
+		return $trolley_type_id;
+	}
+
+	function list_trolley_type($input){
+		$trolley_type_id = $input['trolley_type_id'] ?? 0;		
+		$trolley_type = $input['trolley_type'] ?? 'NULL';
+		$trolley_type_list = $this->Common_model->callSP("GET_TROLLEY_TYPE_LIST(".$trolley_type_id.",".$trolley_type.")","");
+		return $trolley_type_list;
+	}
+
+	function list_location($input=NULL){
+		$location_id = $input['location_id'] ?? 0;		
+		$location_name = $input['location_name'] ?? 'NULL';
+		$store_id = $input['store_id'] ?? 'NULL';
+		$location_no = $input['location_no'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$location_list = $this->Common_model->callSP("GET_LOCATIONS_LIST(".$location_id.",".$store_id.",".$location_name.",".$location_no.")",$result_type);
+		return $location_list;
+	}
+
+	function add_location($input){	
+		$location_id = $input['location_id'] ?? 0;		
+		$store_id = $input['store_id'] ?? NULL;
+		$floor_no = $input['floor_no'] ?? NULL;
+		$room_no = $input['room_no'] ?? NULL;
+		$rack_no = $input['rack_no'] ?? NULL;
+		$shelf_no = $input['shelf_no'] ?? NULL;
+		$bin_no = $input['bin_no'] ?? NULL;
+		$location_name = $input['location_name'] ?? NULL;
+		$location_remarks = $input['location_remarks'] ?? NULL;
+		$created_by = $input['created_by'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$location_id = $this->Common_model->callSP("SAVE_LOCATIONS(".$store_id.", '".$floor_no."', '".$room_no."', '".$rack_no."', '".$shelf_no."', '".$bin_no."', '".$location_name."', '".$location_remarks."', ".$created_by.",'".$is_deleted."',".$location_id.")","row");
+		return $location_id;
+	}
+
+	function list_store_detail($input){
+		$store_detail_id = $input['store_detail_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$store_detail = $this->Common_model->callSP("GET_STORE_DETAIL_LIST()","row");
+		return $store_detail;
+	}
+
+	function add_department(){
+		$department_id = $this->input->post('department_id');
+		$department_name = $this->input->post('department_name');		
+		$created_by = 1;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$department_id = $this->Common_model->callSP("SAVE_DEPARTMENT('".$department_name."', ".$created_by.", '".$is_deleted."', '".$department_id."')", "row");
+		return $department_id;
+	}
+
+	function list_department($input){
+		$department_id = $input['department_id'] ?? 0;
+		$department_name = $input['department_name'] ?? 'NULL';
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$department_list = $this->Common_model->callSP("GET_DEPARTMENT_LIST(".$department_id.",".$department_name.",'".$is_deleted."')","");
+		//echo $this->db->last_query();exit;
+		return $department_list;
+	}
+
+	function list_unit_conversion($input=NULL){
+		$unit_conversion_id = $input['unit_conversion_id'] ?? 0;
+		$client_id = $input['client_id'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$unit_conversion_list = $this->Common_model->callSP("GET_UNIT_CONVERSION_LIST(".$client_id.",".$unit_conversion_id.")","");
+		return $unit_conversion_list;
+	}
+
+	function add_unit_conversion($input) {
+		$unit_conversion_id = $input['unit_conversion_id'] ?? 0;
+		$from_unit_value = $input['from_unit_value'] ?? 0;
+		$from_unit_id = $input['from_unit_id'] ?? 0;
+		$to_unit_value = $input['to_unit_value'] ?? 0;
+		$to_unit_id = $input['to_unit_id'] ?? 0;
+		$client_id = $input['client_id'] ?? 0;
+		$created_by = $input['created_by'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$is_deleted = $input['is_deleted'] ?? 0;
+
+		$unit_conversion_detail = $this->Common_model->callSP("SAVE_UNIT_CONVERSION(".$unit_conversion_id.",".$client_id.",".$from_unit_id.",".$from_unit_value.",".$to_unit_id.",".$to_unit_value.",'".$is_deleted."',".$created_by.")",$result_type);
+		return $unit_conversion_detail;
+	}
+	function list_grn($input){
+		$grn_type_id = $input['grn_type_id'] ?? 0;
+		$grn_type_name = $input['grn_type_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$grn_list = $this->Common_model->callSP("GET_GRN_TYPE_LIST(".$grn_type_id.",'".$grn_type_name."',".$client_id.")","");
+		return $grn_list;
+	}
+	function add_grn_type($input){
+		$grn_type_id = $input['grn_type_id'] ?? 0;
+		$grn_type_name = $input['grn_type_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$grn_id = $this->Common_model->callSP("SAVE_GRN_TYPE(".$grn_type_id.",'".$grn_type_name."','".$is_deleted."',".$client_id.")",$result_type);
+		return $grn_id;
+	}
+	function list_sales_type($input){
+		$sales_type_id = $input['sales_type_id'] ?? 0;
+		$sales_type_name = $input['sales_type_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$sales_list = $this->Common_model->callSP("GET_SALES_TYPE_LIST(".$sales_type_id.",'".$sales_type_name."',".$client_id.")","");
+		return $sales_list;
+	}
+	function add_sales_type($input){
+		$sales_type_id = $input['sales_type_id'] ?? 0;
+		$sales_type_name = $input['sales_type_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$sales_type_list = $this->Common_model->callSP("SAVE_SALES_TYPE(".$sales_type_id.",'".$sales_type_name."',".$client_id.",'".$is_deleted."')",$result_type);
+		//echo $this->db->last_query();exit;
+
+		return $sales_type_list;
+	}
+	function list_invoice($input){
+		$invoice_id = $input['invoice_id'] ?? 0;
+		$invoice_name = $input['invoice_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$invoice_list = $this->Common_model->callSP("GET_INVOICE_LIST(".$invoice_id.",'".$invoice_name."',".$client_id.")","");
+		// echo $this->db->last_query();exit;
+		return $invoice_list;
+	}
+	function add_invoice($input){
+		//pr($input);exit;
+		$invoice_id = $input['invoice_id'] ?? 0;
+		$invoice_name = $input['invoice_name'] ?? NULL;
+		$client_id = $input['client_id'] ?? 0;
+		$is_deleted = $input['is_deleted'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$invoice_type_list = $this->Common_model->callSP("SAVE_INVOICE(".$invoice_id.",'".$invoice_name."','".$is_deleted."',".$client_id.")",$result_type);
+		//echo $this->db->last_query();exit;
+		return $invoice_type_list;
+	}
+}
+

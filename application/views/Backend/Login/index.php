@@ -1,0 +1,34 @@
+<style>
+    .header-brand-img{ height:3.9rem; }
+</style>
+<!-- Page -->
+<div class="page main-signin-wrapper">
+    <!-- Row -->
+    <div class="row text-center ps-0 pe-0 ms-0 me-0">
+        <div class=" col-xl-5 col-lg-5 col-md-5 d-block mx-auto">
+            <?php $this->load->view('Backend/Login/logo.php'); ?>
+            <div class="card custom-card">
+                <div class="card-body pd-45">
+                    <h4 class="text-center">Sign In to Your Account</h4>
+                    <?php $this->load->view('Backend/Elements/Alert.php'); ?>
+                    <form class="form-horizontal form-material" id="" action="<?php echo BASE_URL.'login/login'?>" method="post">
+                        <div class="form-group text-start">
+                            <label>Email</label>
+                            <input class="form-control" placeholder="Enter your email" type="text" name="email" required value="admin@admin.com">
+                        </div>
+                        <div class="form-group text-start">
+                            <label>Password</label>
+                            <input class="form-control" placeholder="Enter your password" type="password" name="password" required value="Kundan@2020!">
+                        </div>
+                        <input type="submit" name="submit" class="btn ripple btn-main-primary btn-block" value="Sign In">
+                    </form>
+                    <div class="mt-3 text-center">
+                        <p class="mb-1"><a href="<?php echo BASE_URL.'forget-password'?>">Forgot password?</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Row -->
+</div>
+<!-- End Page -->

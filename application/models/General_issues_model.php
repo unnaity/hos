@@ -1,0 +1,58 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Pick_list_model extends CI_Model {
+	
+	function __construct()
+    {
+        parent::__construct();
+    }
+
+	function sales_order_product_location($input){
+		$store_id = $input['store_id'] ?? 0;
+		$sales_order_id = $input['sales_order_id'] ?? 0;
+		$product_id = $input['product_id'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$sales_order_product_location_list = $this->Common_model->callSP("GET_SO_PRODUCT_LOCATION_LIST(".$store_id.",".$sales_order_id.",".$product_id.")", $result_type);
+		return $sales_order_product_location_list;
+	}
+
+	function box_list($input){
+		$box_id = $input['box_id'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$pick_list_box_no = $input['pick_list_box_no'] ?? 0;
+		$result_type = $input['result_type'] ?? '';
+		$pick_list_box = $this->Common_model->callSP("GET_BOX_LIST(".$box_id.",".$pick_list_box_no.",".$store_id.")", $result_type);
+		return $pick_list_box;
+	}
+
+	function add_pick_list_item($input){
+		return $pick_list_box = $this->Common_model->insertValue('tbl_pick_list',$input);
+	}
+
+	function update_remaining_item($input){
+		$remaining_item = $input['remaining_item'] ?? 0;
+		$store_id = $input['store_id'] ?? 0;
+		$box_detail_id = $input['box_detail_id'] ?? 0;
+		if($box_detail_id > 0){
+			return $pick_list_box = $this->Common_model->updateValue(array('remaining_item'=>$remaining_item),'tbl_box_detail',array('box_detail_id'=>$box_detail_id));
+		}
+	}
+
+	function get_pick_list_item($input){
+		$box_detail_id=$input['box_detail_id'] ?? 0;
+		$sales_order_id=$input['sales_order_id'] ?? 0;
+		return $get_pick_list_item = $this->Common_model->getAll('tbl_pick_list',$input);
+	}
+
+	function dispatch_list($input){
+		$store_id = $input['store_id'] ?? 0;
+		$customer_id = $input['customer_id'] ?? 0;
+		$sales_order_id = $input['sales_order_id'] ?? 0;
+		$from_date = $input['from_date'] ?? 'NULL';
+		$to_date = $input['to_date'] ?? 'NULL';
+		$result_type = $input['result_type'] ?? '';
+		return $dispatch_list = $this->Common_model->callSP("GET_PICK_LIST(".$store_id.",".$customer_id.",".$sales_order_id.",".$from_date.",".$to_date.")", $result_type);
+	}
+
+}
+

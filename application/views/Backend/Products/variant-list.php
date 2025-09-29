@@ -1,0 +1,66 @@
+<!-- Main Content-->
+<div class="main-content pt-0">
+	<div class="side-app">
+		<div class="main-container container-fluid">
+			<!-- Page Header -->
+			<div class="page-header" style="min-height:unset;"></div>
+			<!-- End Page Header -->
+			<?php $this->load->view('Backend/Elements/success-message.php'); ?>
+			<!-- Row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card custom-card">
+						<div class="card-body">
+							<div class="card-header border-bottom-0 p-0">
+								<h4 class="text-start" style="float: left;"><?php echo ucwords(str_replace('-',' ',$this->page_name))?></h4>
+								<div class="btn btn-list" style="float: right;margin-top:-4px;">
+									<a class="btn ripple btn-secondary" href="#" title="Download"><i class="fe fe-download"></i></a>
+								
+									<a class="btn ripple btn-success" href="#" data-bs-target="#add-<?php echo $this->page_title;?>" data-bs-toggle="modal" title="Add New <?php echo $this->page_title;?>"><i class="fe fe-plus"></i></a>
+								</div>
+								<!--p class="text-muted card-sub-title" style="display:inline-flex;">The categories here can be assigned to items for better organizing and grouping of products and materials.</p-->
+							</div>
+							<div class="table-responsive">
+								<table id="example2" class="table table-striped table-bordered text-nowrap" style="border-left:1px solid #e1e6f1;">
+									<thead>
+										<tr>
+											<th>Variant title</th>
+											<th>Variant Option</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+									<?php if($this->variant_list):
+										foreach($this->variant_list as $obj): ?>
+										<tr>
+											<td><?php echo $obj->variant_title ?></td>
+											<td><?php echo $obj->variant_option ?></td>
+											<td>
+												<button id="bDel" type="button" class="btn  btn-sm btn-danger" onclick="confirm_modal('<?php echo base_url() ?>');"><span class="fe fe-trash-2"> </span></button>
+											</td>
+										</tr>
+									<?php endforeach;
+									else: echo "<tr><td colspan='3'>No record found!</td></tr>";
+									endif;
+									?>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Row -->
+		</div>
+	</div>
+</div>
+<!-- End Main Content-->
+<?php $this->load->view('Backend/'.$this->class_name.'/add-variant'); ?>
+<?php if(validation_errors() || $this->session->flashdata('error_message')){ ?>
+<script type="text/javascript">
+    $(window).on('load', function() {
+		$('#add-Variant').modal('show');
+	});
+</script>
+<?php } ?>

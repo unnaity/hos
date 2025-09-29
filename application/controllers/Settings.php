@@ -1,0 +1,1624 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Settings extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        if ($this->session->userdata('is_loggedin') != 1)
+            redirect(BASE_URL . 'login', 'refresh');
+
+        $this->load->model('Settings_model', 'Settings');
+        $this->user_detail = $this->session->userdata('user_detail');
+        $this->branch_id = $this->session->userdata('branch_id');
+        $this->store_id = $this->session->userdata('store_id');
+        $this->user_id = $this->user_detail->user_id;
+        $this->client_id = $this->user_detail->client_id;
+        $this->category_option = $this->Options->category_option();
+
+        $this->result_type = 'row';
+    }
+    public function index()
+    {
+        $this->category();
+    }
+
+    /********* Category ************/
+
+    public function category()
+    {
+        $category_detail = $this->add_category();
+        if ($category_detail) {
+            $data['category_detail'] = $category_detail;
+            redirect(BASE_URL . 'category-list', 'refresh');
+        }
+        $data['category_list'] = $this->Settings->list_category(array('store_id' => $this->store_id));
+        $data['page_name'] = "category-list";
+        $data['page_title'] = "category";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+
+    public function add_category()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('category_name', 'category name', 'required');
+            if ($this->form_validation->run()) {
+                $category_name = trim($this->input->post('category_name'));
+                $slug = create_unique_slug($category_name, 'tbl_category');
+                $hsn_code = trim($this->input->post('hsn_code'));
+                $created_by = $this->user_detail->user_id;
+                $category_detail = $this->Settings->add_category(array(
+                    'category_name' => $category_name,
+                    'slug' => $slug,
+                    'hsn_code' => $hsn_code,
+                    'result_type' => $this->result_type,
+                    'created_by' => $created_by
+                ));
+                if ($category_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $category_detail->message);
+                } else if ($category_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $category_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $category_detail;
+            }
+        }
+    }
+
+    function delete_category($category_id)
+    {
+        $category_list = $this->Settings->list_category(
+            array(
+                'category_id' => $category_id,
+                'result_type' => $this->result_type
+            )
+        );
+        if (!empty($category_list)) {
+            $category_detail = $this->Settings->add_category(
+                array(
+                    'category_id' => $category_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+                if ($category_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $category_detail->message);
+            } else if ($category_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $category_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'category-list', 'refresh');
+    }
+    function edit_category($category_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('category', 'Category name', 'required');
+            if ($this->form_validation->run()) {
+                $category_name = trim($this->input->post('category'));
+                $slug = create_unique_slug($category_name, 'tbl_category');
+                $hsn_code = trim($this->input->post('hsn_code'));
+                $created_by = $this->user_detail->user_id;
+
+                $category_detail = $this->Settings->add_category(array(
+                    'category' => $category_name,
+                    'slug' => $slug,
+                    'hsn_code' => $hsn_code,
+                    'result_type' => $this->result_type,
+                    'created_by' => $created_by
+                ));
+                if ($category_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $category_detail->message);
+                    redirect(BASE_URL . 'category-edit/' . $category_id, 'refresh');
+                } else if ($category_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $category_detail->message);
+                    redirect(BASE_URL . 'category-edit/' . $category_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'category-edit/' . $category_id, 'refresh');
+                }
+            }
+        }
+        $category_detail = $this->Settings->list_category(array('category_id' => $category_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        // print_r ($category_detail);
+        $this->category_option = $this->Options->category_option(array('selected_value' => $category_id));
+        $data['category_detail'] = $category_detail;
+        $data['page_name'] = "category-edit";
+        $data['page_title'] = "category";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    /********* Sub Category ************/
+    public function sub_category()
+    {
+        $subcategory_detail = $this->add_subcategory();
+        if ($subcategory_detail) {
+            $data['subcategory_detail'] = $subcategory_detail;
+            redirect(BASE_URL . 'subcategory-list', 'refresh');
+        }
+        $data['subcategory_list'] = $this->Settings->list_subcategory(array('store_id' => $this->store_id));
+        $data['page_name'] = "subcategory-list";
+        $data['page_title'] = "Sub-category";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    public function add_subcategory()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('subcategory_name', 'Subcategory', 'required');
+            $this->form_validation->set_rules('category_id', 'Category', 'required');
+            if ($this->form_validation->run()) {
+                $subcategory_name = trim($this->input->post('subcategory_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $subcategory_array = explode(',', $subcategory_name);
+
+                for ($i = 0; $i < count($subcategory_array); $i++) {
+                    $subcategory_detail = $this->Settings->add_subcategory(
+                        array(
+                            'subcategory' => trim($subcategory_array[$i]),
+                            'category_id' => $category_id,
+                            'store_id' => $this->store_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                }
+                if ($subcategory_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $subcategory_detail->message);
+                } else if ($subcategory_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $subcategory_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $subcategory_detail;
+            }
+        }
+    }
+    function delete_subcategory($subcategory_id)
+    {
+        $subcategory_list = $this->Settings->list_subcategory(
+            array(
+                'subcategory_id' => $subcategory_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($subcategory_list)) {
+            $subcategory_detail = $this->Settings->add_subcategory(
+                array(
+                    'subcategory_id' => $subcategory_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            // echo $this->db->last_query();exit;
+            if ($subcategory_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $subcategory_detail->message);
+            } else if ($subcategory_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $subcategory_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'subcategory-list', 'refresh');
+    }
+    function edit_subcategory($subcategory_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('subcategory_id', 'Subcategory id', 'trim|required');
+            $this->form_validation->set_rules('subcategory_name', 'Subcategory name', 'trim|required');
+            $this->form_validation->set_rules('category_id', 'Category', 'trim|required');
+            // $this->form_validation->set_rules('subcategory_name', 'Subcategory name', 'trim|required');          
+
+            if ($this->form_validation->run()) {
+
+                $subcategory_id = $this->input->post('subcategory_id');
+                $subcategory_name = trim($this->input->post('subcategory_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $subcategory_detail = $this->Settings->add_subcategory(array(
+                    'subcategory_id' => $subcategory_id,
+                    'category_id' => $category_id,
+                    'store_id' => $this->store_id,
+                    'subcategory' => $subcategory_name,
+                    'created_by' => $created_by,
+                    'result_type' => $this->result_type
+                ));
+
+                if ($subcategory_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $subcategory_detail->message);
+                    redirect(BASE_URL . 'subcategory-edit/' . $subcategory_id, 'refresh');
+                } else if ($subcategory_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $subcategory_detail->message);
+                    redirect(BASE_URL . 'subcategory-edit/' . $subcategory_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'subcategory-edit/' . $subcategory_id, 'refresh');
+                }
+            }
+        }
+        $subcategory_detail = $this->Settings->list_subcategory(array('subcategory_id' => $subcategory_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        $this->category_option = $this->Options->category_option(array('selected_value' => $subcategory_detail->category_id));
+
+        $data['subcategory_detail'] = $subcategory_detail;
+        $data['page_name'] = "subcategory-edit";
+        $data['page_title'] = "Sub-category";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    /********* Size ************/
+
+    public function size_list()
+    {
+        $size_detail = $this->add_size();
+        if ($size_detail) {
+            $data['size_detail'] = $size_detail;
+            redirect(BASE_URL . 'size-list', 'refresh');
+        }
+        $data['size_list'] = $this->Settings->list_size(array('store_id' => $this->store_id));
+        $data['page_name'] = "size-list";
+        $data['page_title'] = "size";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_size()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('size_name', 'Size', 'required');
+            $this->form_validation->set_rules('category_id', 'Category', 'required');
+            if ($this->form_validation->run()) {
+                $size_name = trim($this->input->post('size_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $size_array = explode(',', $size_name);
+
+                for ($i = 0; $i < count($size_array); $i++) {
+                    $size_detail = $this->Settings->add_size(
+                        array(
+                            'size' => trim($size_array[$i]),
+                            'category_id' => $category_id,
+                            'store_id' => $this->store_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                }
+                if ($size_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $size_detail->message);
+                } else if ($size_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $size_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $size_detail;
+            }
+        }
+    }
+
+
+    function delete_size($size_id)
+    {
+        $size_list = $this->Settings->list_size(
+            array(
+                'size_id' => $size_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($size_list)) {
+            $size_detail = $this->Settings->add_size(
+                array(
+                    'size_id' => $size_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($size_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $size_detail->message);
+            } else if ($size_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $size_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'size-list', 'refresh');
+    }
+
+    function edit_size($size_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('size_id', 'Size id', 'trim|required');
+            $this->form_validation->set_rules('size_name', 'Size name', 'trim|required');
+            $this->form_validation->set_rules('category_id', 'Category', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $size_id = $this->input->post('size_id');
+                $size_name = trim($this->input->post('size_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $size_detail = $this->Settings->add_size(array(
+                    'size_id' => $size_id,
+                    'category_id' => $category_id,
+                    'store_id' => $this->store_id,
+                    'size' => $size_name,
+                    'created_by' => $created_by,
+                    'result_type' => $this->result_type
+                ));
+                // echo $this->db->last_query();
+                if ($size_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $size_detail->message);
+                    redirect(BASE_URL . 'size-edit/' . $size_id, 'refresh');
+                } else if ($size_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $size_detail->message);
+                    redirect(BASE_URL . 'size-edit/' . $size_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'size-edit/' . $size_id, 'refresh');
+                }
+            }
+        }
+        $size_detail = $this->Settings->list_size(array('size_id' => $size_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        $this->category_option = $this->Options->category_option(array('selected_value' => $size_detail->category_id));
+
+        $data['size_detail'] = $size_detail;
+        $data['page_name'] = "size-edit";
+        $data['page_title'] = "size";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    /********* Model ************/
+
+    public function model_list()
+    {
+        $model_detail = $this->add_model();
+        if ($model_detail) {
+            $data['model_detail'] = $model_detail;
+            redirect(BASE_URL . 'model-list', 'refresh');
+        }
+        $data['model_list'] = $this->Settings->list_model(array('store_id' => $this->store_id));
+        $data['page_name'] = "model-list";
+        $data['page_title'] = "model";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_model()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('model_name', 'Model', 'required');
+            $this->form_validation->set_rules('category_id', 'Category', 'required');
+            if ($this->form_validation->run()) {
+                $model_name = trim($this->input->post('model_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $model_array = explode(',', $model_name);
+
+                for ($i = 0; $i < count($model_array); $i++) {
+                    $model_detail = $this->Settings->add_model(
+                        array(
+                            'model' => trim($model_array[$i]),
+                            'category_id' => $category_id,
+                            'store_id' => $this->store_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                }
+                if ($model_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $model_detail->message);
+                } else if ($model_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $model_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $model_detail;
+            }
+        }
+    }
+
+    function delete_model($model_id)
+    {
+        $model_list = $this->Settings->list_model(
+            array(
+                'model_id' => $model_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($model_list)) {
+            $model_detail = $this->Settings->add_model(
+                array(
+                    'model_id' => $model_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($model_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $model_detail->message);
+            } else if ($model_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $model_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'model-list', 'refresh');
+    }
+    function edit_model($model_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('model_id', 'Model id', 'trim|required');
+            $this->form_validation->set_rules('model_name', 'Model name', 'trim|required');
+            $this->form_validation->set_rules('category_id', 'Category', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $model_id = $this->input->post('model_id');
+                $model_name = trim($this->input->post('model_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $model_detail = $this->Settings->add_model(array(
+                    'model_id' => $model_id,
+                    'category_id' => $category_id,
+                    'store_id' => $this->store_id,
+                    'model' => $model_name,
+                    'created_by' => $created_by,
+                    'result_type' => $this->result_type
+                ));
+                // echo $this->db->last_query();exit;
+                if ($model_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $model_detail->message);
+                    redirect(BASE_URL . 'model-edit/' . $model_id, 'refresh');
+                } else if ($model_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $model_detail->message);
+                    redirect(BASE_URL . 'model-edit/' . $model_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'model-edit/' . $model_id, 'refresh');
+                }
+            }
+        }
+        $model_detail = $this->Settings->list_model(array('model_id' => $model_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        $this->category_option = $this->Options->category_option(array('selected_value' => $model_detail->category_id));
+        $data['model_detail'] = $model_detail;
+        $data['page_name'] = "model-edit";
+        $data['page_title'] = "model";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    /********* Quality ************/
+
+    public function quality_list()
+    {
+        $quality_detail = $this->add_quality();
+        if ($quality_detail) {
+            $data['quality_detail'] = $quality_detail;
+            redirect(BASE_URL . 'quality-list', 'refresh');
+        }
+        $data['quality_list'] = $this->Settings->list_quality(array('store_id' => $this->store_id));
+        $data['page_name'] = "quality-list";
+        $data['page_title'] = "quality";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_quality()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('quality_name', 'Quality', 'required');
+            $this->form_validation->set_rules('category_id', 'Category', 'required');
+            if ($this->form_validation->run()) {
+                $quality_name = trim($this->input->post('quality_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $quality_array = explode(',', $quality_name);
+
+                for ($i = 0; $i < count($quality_array); $i++) {
+                    $quality_detail = $this->Settings->add_quality(
+                        array(
+                            'quality' => trim($quality_array[$i]),
+                            'category_id' => $category_id,
+                            'store_id' => $this->store_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                }
+                if ($quality_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $quality_detail->message);
+                } else if ($quality_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $quality_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $quality_detail;
+            }
+        }
+    }
+
+    function delete_quality($quality_id)
+    {
+        $quality_list = $this->Settings->list_quality(
+            array(
+                'quality_id' => $quality_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($quality_list)) {
+            $quality_detail = $this->Settings->add_quality(
+                array(
+                    'quality_id' => $quality_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($quality_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $quality_detail->message);
+            } else if ($quality_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $quality_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'quality-list', 'refresh');
+    }
+    function edit_quality($quality_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('quality_id', 'Quality id', 'trim|required');
+            $this->form_validation->set_rules('quality_name', 'Quality name', 'trim|required');
+            $this->form_validation->set_rules('category_id', 'Category', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $quality_id = $this->input->post('quality_id');
+                $quality_name = trim($this->input->post('quality_name'));
+                $category_id = trim($this->input->post('category_id'));
+                $created_by = $this->user_detail->user_id;
+
+                $quality_detail = $this->Settings->add_quality(array(
+                    'quality_id' => $quality_id,
+                    'category_id' => $category_id,
+                    'store_id' => $this->store_id,
+                    'quality' => $quality_name,
+                    'created_by' => $created_by,
+                    'result_type' => $this->result_type
+                ));
+                // echo $this->db->last_query();exit;
+                if ($quality_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $quality_detail->message);
+                    redirect(BASE_URL . 'quality-edit/' . $quality_id, 'refresh');
+                } else if ($quality_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $quality_detail->message);
+                    redirect(BASE_URL . 'quality-edit/' . $quality_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'quality-edit/' . $quality_id, 'refresh');
+                }
+            }
+        }
+        $quality_detail = $this->Settings->list_quality(array('quality_id' => $quality_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        $this->category_option = $this->Options->category_option(array('selected_value' => $quality_detail->category_id));
+        $data['quality_detail'] = $quality_detail;
+        $data['page_name'] = "quality-edit";
+        $data['page_title'] = "quality";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    /********* UNIT ************/
+
+    public function units_of_measure()
+    {
+        $uom_detail = $this->add_units_of_measure();
+        if ($uom_detail) {
+            $data['uom_detail'] = $uom_detail;
+            redirect(BASE_URL . 'units-of-measure', 'refresh');
+        }
+        $data['uom_list'] = $this->Settings->list_units_of_measure(array());
+        // pr($data['uom_list']);exit;
+        $data['page_name'] = "uom-list";
+        $data['page_title'] = "Units of measure";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_units_of_measure()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('unit', 'Units', 'required');
+            if ($this->form_validation->run()) {
+
+                $unit = trim($this->input->post('unit'));
+
+                $uom_detail = $this->Settings->add_units_of_measure(
+                    array(
+                        'unit' => $unit,
+                        'store_id' => $this->store_id,
+                        'result_type' => $this->result_type,
+                        'created_by' => $this->user_detail->user_id
+                    )
+                );
+                if ($uom_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $uom_detail->message);
+                } else if ($uom_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $uom_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $uom_detail;
+            }
+        }
+    }
+
+    function delete_unit($unit_id)
+    {
+        $unit_list = $this->Settings->list_units_of_measure(
+            array(
+                'unit_id' => $unit_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($unit_list)) {
+            $unit_detail = $this->Settings->add_units_of_measure(
+                array(
+                    'unit_id' => $unit_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($unit_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $unit_detail->message);
+            } else if ($unit_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $unit_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'units-of-measure', 'refresh');
+    }
+    function edit_unit($unit_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('unit', 'Unit', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $unit = trim($this->input->post('unit'));
+                $unit_id = $this->input->post('unit_id');
+                $created_by = $this->user_detail->user_id;
+
+                $uom_detail = $this->Settings->add_units_of_measure(
+                    array(
+                        'unit' => $unit,
+                        'unit_id' => $unit_id,
+                        'store_id' => $this->store_id,
+                        'result_type' => $this->result_type,
+                        'created_by' => $created_by
+                    )
+                );
+                // print_r($uom_detail);
+                if ($uom_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $uom_detail->message);
+                } else if ($uom_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $uom_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+            }
+        }
+        $uom_detail = $this->Settings->list_units_of_measure(array('unit_id' => $unit_id, 'store_id' => $this->store_id, 'result_type' => $this->result_type));
+        $data['uom_detail'] = $uom_detail;
+        $data['page_name'] = "edit-unit";
+        $data['page_title'] = "uom";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    
+    /********* OPERATIONS ************/
+    public function operations_list()
+    {
+        $operations_detail = $this->add_operations();
+        if ($operations_detail) {
+            $data['operations_detail'] = $operations_detail;
+            redirect(BASE_URL . 'operations-list', 'refresh');
+        }
+        $data['operations_list'] = $this->Settings->list_operations(array());
+        $data['page_name'] = "operations-list";
+        $data['page_title'] = "Operations";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_operations()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('operations', 'Operations', 'required');
+            if ($this->form_validation->run()) {
+                $operations_detail = $this->Settings->add_operations();
+                if ($operations_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $operations_detail->message);
+                } else if ($operations_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $operations_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $operations_detail;
+            }
+        }
+    }
+
+    /********* BRANCH ************/
+
+    public function branches()
+    {
+        $branches_detail = $this->add_branches();
+        if ($branches_detail) {
+            $data['branches_detail'] = $branches_detail;
+            redirect(BASE_URL . 'branches', 'refresh');
+        }
+        $data['branch_list'] = $this->Settings->list_branches(array('client_id' => $this->user_detail->client_id));
+        $data['page_name'] = "branches-list";
+        $data['page_title'] = "branches";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_branches()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('branch_name', 'Branch name', 'required');
+
+            if ($this->form_validation->run()) {
+                $input['branch_name'] = trim($this->input->post('branch_name'));
+                $input['legal_name'] = trim($this->input->post('legal_name'));
+                $input['address'] = trim($this->input->post('address'));
+                $input['created_by'] = $this->user_detail->user_id;
+                $input['client_id'] = $this->user_detail->client_id;;
+
+                $branches_detail = $this->Settings->add_branches($input);
+
+                if ($branches_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $branches_detail->message);
+                } else if ($branches_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $branches_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $branches_detail;
+            }
+        }
+    }
+
+    function delete_branch($branch_id)
+    {
+        $branch_list = $this->Settings->list_branches(
+            array(
+                'branch_id' => $branch_id,
+                'client_id' => $this->user_detail->client_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($branch_list)) {
+            $branch_detail = $this->Settings->add_branches(
+                array(
+                    'branch_id' => $branch_id,
+                    'client_id' => $this->user_detail->client_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($branch_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $branch_detail->message);
+            } else if ($branch_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $branch_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'branches', 'refresh');
+    }
+
+    public function tax_rate()
+    {
+        $tax_rate_detail = $this->add_tax_rate();
+        if ($tax_rate_detail) {
+            $data['tax_rate_detail'] = $tax_rate_detail;
+            redirect(BASE_URL . 'tax-rates', 'refresh');
+        }
+        $data['tax_rate_list'] = $this->Settings->list_tax_rate(array());
+        $data['page_name'] = "tax-rate-list";
+        $data['page_title'] = "tax rate";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_tax_rate()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('tax_name', 'Tax name', 'required');
+
+            if ($this->form_validation->run()) {
+                $tax_rate_detail = $this->Settings->add_tax_rate();
+                if ($tax_rate_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $tax_rate_detail->message);
+                } else if ($tax_rate_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $tax_rate_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $tax_rate_detail;
+            }
+        }
+    }
+    function delete_tax_rate($tax_id)
+    {
+        $tax_rate_list = $this->Settings->list_tax_rate(
+            array(
+                'tax_id' => $tax_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($tax_rate_list)) {
+            $tax_rate_detail = $this->Settings->add_tax_rate(
+                array(
+                    'tax_id' => $tax_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($tax_rate_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $tax_rate_detail->message);
+            } else if ($tax_rate_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $tax_rate_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'tax-rates', 'refresh');
+    }
+
+
+    function default_tax_rate()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('sales_order', 'Sales order tax', 'required');
+            $this->form_validation->set_rules('purchase_order', 'Purchase order tax', 'required');
+            if ($this->form_validation->run()) {
+                $tax_rate_detail = $this->Settings->add_default_tax_rate();
+                if ($tax_rate_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $tax_rate_detail->message);
+                } else if ($tax_rate_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $tax_rate_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                redirect(BASE_URL . 'tax-rates', 'refresh');
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            redirect(BASE_URL . 'tax-rates', 'refresh');
+        }
+    }
+
+    function general()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('currency_code_id', 'Currency code', 'required');
+            $this->form_validation->set_rules('sales_order', 'Default delivery time for sales orders', 'required');
+            $this->form_validation->set_rules('purchase_order', 'Default lead time for purchase orders', 'required');
+            if ($this->form_validation->run()) {
+                $general_detail = $this->Settings->general();
+
+                if ($general_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $general_detail->message);
+                } else if ($general_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $general_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                redirect(BASE_URL . 'general', 'refresh');
+            }
+        }
+        $data['currency_list'] = $this->Settings->get_currency_list([]);
+        $data['general_detail'] = $this->Settings->get_general_setting([]);
+        $data['page_name'] = "general";
+        $data['page_title'] = "general";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function store_list()
+    {
+        $store_detail = $this->add_store();
+        if ($store_detail) {
+            $data['store_detail'] = $store_detail;
+            redirect(BASE_URL . 'store-list', 'refresh');
+        }
+
+        $data['store_list'] = $this->Settings->list_store(array('branch_id' => $this->branch_id));
+        $data['branch_option'] = $this->Options->branch_option([]);
+        $data['page_name'] = "store-list";
+        $data['page_title'] = "store";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_store()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('store_name', 'store name', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $input['store_id'] = trim($this->input->post('store_id'));
+                $input['store_name'] = trim($this->input->post('store_name'));
+                $input['branch_id'] = $this->branch_id;
+                $input['created_by'] = 1;
+
+                $store_detail = $this->Settings->add_store($input);
+                // pr($store_detail);exit;
+                if ($store_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $store_detail->message);
+                } else if ($store_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $store_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $store_detail;
+            }
+        }
+    }
+    function delete_store($store_id)
+    {
+        $store_list = $this->Settings->list_store(
+            array(
+                'branch_id' => $this->branch_id,
+                'store_id' => $store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($store_list)) {
+            $store_detail = $this->Settings->add_store(
+                array(
+                    'branch_id' => $this->branch_id,
+                    'store_id' => $store_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+           
+            if ($store_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $store_detail->message);
+            } else if ($store_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $store_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'store-list', 'refresh');
+    }
+    public function package_type_list()
+    {
+        $package_type_detail = $this->add_package_type();
+        if ($package_type_detail) {
+            $data['package_type_detail'] = $package_type_detail;
+            redirect(BASE_URL . 'package-type-list', 'refresh');
+        }
+        $data['package_type_list'] = $this->Settings->list_package_type([]);
+        $data['page_name'] = "package-type-list";
+        $data['page_title'] = "package type";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+
+    public function add_package_type()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('package_type', 'package type', 'trim|required');
+            if ($this->form_validation->run()) {
+
+                $input['package_type_id'] = trim($this->input->post('package_type_id'));
+                $input['package_type'] = trim($this->input->post('package_type'));
+                $input['created_by'] = 1;
+
+                $package_type_detail = $this->Settings->add_package_type($input);
+                if ($package_type_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $package_type_detail->message);
+                } else if ($package_type_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $package_type_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $package_type_detail;
+            }
+        }
+    }
+
+    public function trolley_type_list()
+    {
+        $trolley_type_detail = $this->add_trolley_type();
+        if ($trolley_type_detail) {
+            $data['trolley_type_detail'] = $trolley_type_detail;
+            redirect(BASE_URL . 'trolley-type-list', 'refresh');
+        }
+        $data['trolley_type_list'] = $this->Settings->list_trolley_type([]);
+        $data['page_name'] = "trolley-type-list";
+        $data['page_title'] = "trolley type";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_trolley_type()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('trolley_type', 'trolley type', 'trim|required');
+            if ($this->form_validation->run()) {
+
+                $input['trolley_type_id'] = trim($this->input->post('trolley_type_id'));
+                $input['trolley_type'] = trim($this->input->post('trolley_type'));
+                $input['created_by'] = 1;
+
+                $trolley_type_detail = $this->Settings->add_trolley_type($input);
+                if ($trolley_type_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $trolley_type_detail->message);
+                } else if ($trolley_type_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $trolley_type_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $trolley_type_detail;
+            }
+        }
+    }
+
+    public function location_list()
+    {
+        $data['location_list'] = $this->Settings->list_location(array('store_id' => $this->store_id));
+        $data['page_name'] = "location-list";
+        $data['page_title'] = "locations";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    public function add_location()
+    {
+        $input['store_id'] = 0;
+        if ($this->input->post()) {
+
+            $this->form_validation->set_rules('floor_no', 'floor no.', 'required');
+            $this->form_validation->set_rules('room_no', 'room no.', 'required');
+            $this->form_validation->set_rules('rack_no', 'rack no.', 'required');
+            $this->form_validation->set_rules('shelf_no', 'shelf no.', 'required');
+            $this->form_validation->set_rules('bin_no', 'Bin no.', 'required');
+
+            if ($this->form_validation->run()) {
+
+                $input['store_id'] = $this->store_id;
+                $input['floor_no'] = trim($this->input->post('floor_no'));
+                $input['room_no'] = trim($this->input->post('room_no'));
+                $input['rack_no'] = trim($this->input->post('rack_no'));
+                $input['shelf_no'] = trim($this->input->post('shelf_no'));
+                $input['bin_no'] = trim($this->input->post('bin_no'));
+                $input['location_name'] = trim($this->input->post('location_name'));
+                $input['location_remarks'] = trim($this->input->post('location_remarks'));
+                $input['created_by'] = $this->user_id;
+
+                $location_detail = $this->Settings->add_location($input);
+                if ($location_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $location_detail->message);
+                } else if ($location_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $location_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                redirect(BASE_URL . 'add-location', 'refresh');
+            }
+        }
+        $input['fetch_type'] = "result";
+        $data['store_detail'] = $this->Settings->list_store_detail($input);
+        $data['store_list'] = $this->Settings->list_store($input);
+        $data['page_name'] = "add-location";
+        $data['page_title'] = "location";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    function delete_location($location_id)
+    {
+        $location_list = $this->Settings->list_location(
+            array(
+                'location_id' => $location_id,
+                'store_id' => $this->store_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($location_list)) {
+            $location_detail = $this->Settings->add_location(
+                array(
+                    'location_id' => $location_id,
+                    'store_id' => $this->store_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            // print_r($location_detail);
+            if ($location_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $location_detail->message);
+            } else if ($location_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $location_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'location-list', 'refresh');
+    }
+    function edit_location($location_id)
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('floor_no', 'floor no.', 'required');
+            $this->form_validation->set_rules('room_no', 'room no.', 'required');
+            $this->form_validation->set_rules('rack_no', 'rack no.', 'required');
+            $this->form_validation->set_rules('shelf_no', 'shelf no.', 'required');
+            $this->form_validation->set_rules('bin_no', 'Bin no.', 'required');        
+            $this->form_validation->set_rules('location_id', 'location id', 'required');      
+
+            if ($this->form_validation->run()) {
+
+                $input['store_id'] = $this->store_id;
+                $input['floor_no'] = trim($this->input->post('floor_no'));
+                $input['room_no'] = trim($this->input->post('room_no'));
+                $input['rack_no'] = trim($this->input->post('rack_no'));
+                $input['shelf_no'] = trim($this->input->post('shelf_no'));
+                $input['bin_no'] = trim($this->input->post('bin_no'));
+                $input['location_id'] = $this->input->post('location_id');
+                $input['location_name'] = trim($this->input->post('location_name'));
+                $input['location_remarks'] = trim($this->input->post('location_remarks'));
+                $input['created_by'] = $this->user_id;
+
+                $location_detail = $this->Settings->add_location($input);
+                if ($location_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $location_detail->message);
+                    redirect(BASE_URL . 'location-edit/' . $location_id, 'refresh');
+                } else if ($location_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $location_detail->message);
+                    redirect(BASE_URL . 'location-edit/' . $location_id, 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                    redirect(BASE_URL . 'location-edit/' . $location_id, 'refresh');
+                }
+                
+            }
+        }
+        
+        $input['fetch_type'] = "result";
+        $data['store_detail'] = $this->Settings->list_store_detail($input);
+        $data['store_list'] = $this->Settings->list_store($input);
+        $data['page_name'] = "location-edit";
+        $data['page_title'] = "location";
+        $this->load->view('Backend/Settings/index', $data);
+        
+    }
+
+
+    public function department()
+	{   
+        $department_detail = $this->add_department();
+        if($department_detail){
+            $data['department_detail'] = $department_detail;
+            redirect(BASE_URL . 'department-list', 'refresh');
+        }
+        $data['department_list'] = $this->Settings->list_department(array());        
+		$data['page_name'] = "department-list";
+        $data['page_title'] = "department";
+		$this->load->view('Backend/Settings/index',$data);
+	}
+
+    public function add_department()
+	{	
+        if($this->input->post()){
+            $this->form_validation->set_rules('department_name', 'department name', 'required');
+            if ($this->form_validation->run()){
+                $department_detail = $this->Settings->add_department();
+                if($department_detail->action == 1){
+                    $this->session->set_flashdata('success_message', $department_detail->message);
+                }else if($department_detail->action == 0){
+                    $this->session->set_flashdata('error_message', $department_detail->message);
+                }else{
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $department_detail;
+            }
+        }
+	}
+
+    function delete_department($department_id)
+    {
+        $department_list = $this->Settings->list_department(
+            array(
+                'department_id' => $department_id,
+                'result_type' => $this->result_type
+            )
+        );
+        //pr($department_list);exit;
+        if (!empty($department_list)) {
+            $department_detail = $this->Settings->add_department(
+                array(
+                    'department_id' => $department_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+                );
+            if ($department_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $department_detail->message);
+            } else if ($department_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $department_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'department-list', 'refresh');
+    }
+
+    function change_branch()
+    {
+        $branch_id = $this->input->post('branch_id');
+        $this->session->set_userdata('branch_id', $branch_id);
+        $store_detail = $this->Settings->list_store(array('branch_id' => $branch_id, 'result_type' => 'row'));
+        $this->session->set_userdata('store_id', $store_detail->store_id);
+    }
+
+    function change_store()
+    {
+        $store_id = $this->input->post('store_id');
+        $this->session->set_userdata('store_id', $store_id);
+    }
+
+    function unit_conversion()
+    {
+
+        $this->add_unit_conversion();
+
+        $data['unit_conversion'] = $this->Settings->list_unit_conversion(array('client_id' => $this->user_detail->client_id));
+        $data['page_name'] = "unit-conversion-list";
+        $data['page_title'] = "Unit Conversion";
+        $this->uom_option = $this->Options->uom_option();
+        $this->load->view('Backend/Settings/index', $data);
+    }
+
+    function add_unit_conversion()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('from_unit_value', 'From Unit Value', 'trim|required');
+            $this->form_validation->set_rules('from_unit_id', 'From Unit Value', 'trim|required');
+            $this->form_validation->set_rules('to_unit_value', 'To Unit Value', 'trim|required');
+            $this->form_validation->set_rules('to_unit_id', 'To Unit Value', 'trim|required');
+
+            if ($this->form_validation->run()) {
+
+                $from_unit_value = $this->input->post('from_unit_value');
+                $from_unit_id = $this->input->post('from_unit_id');
+                $to_unit_value = $this->input->post('to_unit_value');
+                $to_unit_id = $this->input->post('to_unit_id');
+                $created_by = $this->user_detail->user_id;
+                $client_id = $this->user_detail->client_id;
+
+                $conversion_detail = $this->Settings->add_unit_conversion(array(
+                    'from_unit_value' => $from_unit_value,
+                    'from_unit_id' => $from_unit_id,
+                    'to_unit_value' => $to_unit_value,
+                    'to_unit_id' => $to_unit_id,
+                    'result_type' => $this->result_type,
+                    'created_by' => $created_by,
+                    'client_id' => $client_id,
+                    'result_type' => $this->result_type
+                ));
+                if ($conversion_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $conversion_detail->message);
+                } else if ($conversion_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $conversion_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                //return $conversion_detail;
+                redirect(BASE_URL . 'unit-conversion', 'refresh');
+            }
+        }
+    }
+
+    function delete_unit_conversion($unit_conversion_id)
+    {
+        $unit_conversion_list = $this->Settings->list_unit_conversion(
+            array(
+                'unit_conversion_id' => $unit_conversion_id,
+                'client_id' => $this->user_detail->client_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($unit_conversion_list)) {
+            $unit_conversion_detail = $this->Settings->add_unit_conversion(
+                array(
+                    'unit_conversion_id' => $unit_conversion_id,
+                    'client_id' => $this->user_detail->client_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            if ($unit_conversion_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $unit_conversion_detail->message);
+            } else if ($unit_conversion_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $unit_conversion_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.fasd");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'unit-conversion', 'refresh');
+    }
+
+    /********* GRN ************/
+    function grn_list()
+    {
+        $grn_detail = $this->add_grn_type();
+        if ($grn_detail) {
+            $data['grn_detail'] = $grn_detail;
+            redirect(BASE_URL . 'grn-type-list', 'refresh');
+        }
+        $data['grn_list'] = $this->Settings->list_grn(array('store_id' => $this->store_id));
+        $data['page_name'] = "grn-type-list";
+        $data['page_title'] = "grn-Type";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    function add_grn_type()
+    {
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('grn_type_name', 'Grn Type Name', 'required');
+            $this->form_validation->set_rules('grn_type_id', 'Grn Type Id');
+            if ($this->form_validation->run()) {
+                $grn_type_name = $this->input->post('grn_type_name');
+                $grn_type_id = $this->input->post('grn_type_id');
+                $created_by = $this->user_detail->user_id;
+
+                    $grn_type_detail = $this->Settings->add_grn_type(
+                        array(
+                            'grn_type_name' => $grn_type_name,
+                            'grn_type_id' => $grn_type_id,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                if ($grn_type_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $grn_type_detail->message);
+                } else if ($grn_type_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $grn_type_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $grn_type_detail;
+            }
+        }
+        
+    }
+    function delete_grn($grn_type_id)
+    {           
+        $grn_list = $this->Settings->list_grn(
+            array(
+                'grn_type_id' => $grn_type_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($grn_list)) {
+            $grn_type_detail = $this->Settings->add_grn_type(
+                array(
+                    'grn_type_id' => $grn_type_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            // echo $this->db->last_query();exit;
+            if ($grn_type_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $grn_type_detail->message);
+            } else if ($grn_type_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $grn_type_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'grn-type-list', 'refresh');
+    }
+
+    /********* Sales Type ************/
+    function sales_type_list(){
+        $sales_type_detail = $this->add_sales_type();
+        if ($sales_type_detail) {
+            $data['sales_type_detail'] = $sales_type_detail;
+            redirect(BASE_URL . 'sales-type-list', 'refresh');
+        }
+        $data['sales_type_list'] = $this->Settings->list_sales_type(array());
+        $data['page_name'] = "sales-type-list";
+        $data['page_title'] = "sales-Type";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    function add_sales_type(){
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('sales_type_name', 'Sales Type Name', 'required');
+            $this->form_validation->set_rules('sales_type_id', 'Sales Type Id');
+            if ($this->form_validation->run()) {
+                $sales_type_name = trim($this->input->post('sales_type_name'));
+                $sales_type_id = $this->input->post('sales_type_id');
+                $created_by = $this->user_detail->user_id;
+
+                    $sales_type_detail = $this->Settings->add_sales_type(
+                        array(
+                            'sales_type_name' => $sales_type_name,
+                            'sales_type_id' =>$sales_type_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                // echo $this->db->last_query();exit;
+                if ($sales_type_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $sales_type_detail->message);
+                } else if ($sales_type_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $sales_type_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $sales_type_detail;
+            }
+        }
+    }
+    function delete_sales_type($sales_type_id)
+    {
+        $sales_type_list = $this->Settings->list_sales_type(
+            array(
+                'sales_type_id' => $sales_type_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($sales_type_list)) {
+            $sales_type_detail = $this->Settings->add_sales_type(
+                array(
+                    'sales_type_id' => $sales_type_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            // echo $this->db->last_query();exit;
+            if ($sales_type_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $sales_type_detail->message);
+            } else if ($sales_type_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $sales_type_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'sales-type-list', 'refresh');
+    }
+
+    /********* Invoice List ************/
+    function list_invoice()
+    {
+        $invoice_detail = $this->add_invoice();
+        if ($invoice_detail) {
+        $data['invoice_detail'] = $invoice_detail;
+             //redirect(BASE_URL . 'invoice-list', 'refresh');
+        }
+        $data['invoice_list'] = $this->Settings->list_invoice(array());
+        $data['page_name'] = "invoice-list";
+        $data['page_title'] = "invoice";
+        $this->load->view('Backend/Settings/index', $data);
+    }
+    function add_invoice(){
+        if ($this->input->post()) {
+            $this->form_validation->set_rules('invoice_name', 'Invoice Name', 'required');
+            $this->form_validation->set_rules('invoice_id', 'Invoice Id');
+            if ($this->form_validation->run()) {
+                $invoice_name = trim($this->input->post('invoice_name'));
+                $invoice_id = $this->input->post('invoice_id');
+                $created_by = $this->user_detail->user_id;
+
+                    $invoice_detail = $this->Settings->add_invoice(
+                        array(
+                            'invoice_name' => $invoice_name,
+                            'invoice_id' =>$invoice_id,
+                            'created_by' => $created_by,
+                            'result_type' => $this->result_type
+                        )
+                    );
+                //echo $this->db->last_query();exit;
+                if ($invoice_detail->action == 1) {
+                    $this->session->set_flashdata('success_message', $invoice_detail->message);
+                } else if ($invoice_detail->action == 0) {
+                    $this->session->set_flashdata('error_message', $invoice_detail->message);
+                } else {
+                    $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+                }
+                return $invoice_detail;
+            }
+        }
+    }
+    function delete_invoice($invoice_id)
+    {
+        $invoice_list = $this->Settings->list_invoice(
+            array(
+                'invoice_id' => $invoice_id,
+                'result_type' => $this->result_type
+            )
+        );
+
+        if (!empty($invoice_list)) {
+            $invoice_detail = $this->Settings->add_invoice(
+                array(
+                    'invoice_id' => $invoice_id,
+                    'is_deleted' => '1',
+                    'result_type' => $this->result_type,
+                    'created_by' => $this->user_detail->user_id
+                )
+            );
+            // echo $this->db->last_query();exit;
+            if ($invoice_detail->action == 1) {
+                $this->session->set_flashdata('success_message', $invoice_detail->message);
+            } else if ($invoice_detail->action == 0) {
+                $this->session->set_flashdata('error_message', $invoice_detail->message);
+            } else {
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }
+        } else {
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }
+        redirect(BASE_URL . 'invoice-list', 'refresh');
+    }
+
+
+}

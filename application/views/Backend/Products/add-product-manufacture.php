@@ -1,0 +1,186 @@
+<!-- Main Content-->
+<div class="main-content pt-0">
+	<div class="side-app">
+		<div class="main-container container-fluid">
+			<!-- Page Header -->
+			<div class="page-header" style="min-height:unset;">
+				<h3 class="text-start mb-0"><?php echo "Add ".UCFIRST($this->class_name); ?></h3>
+				<div class="btn btn-list">
+					<a href="<?php echo BASE_URL.'product-list'?>">
+					<button aria-label="Close" class="btn ripple btn-dark btn-rounded" type="button"><span aria-hidden="true">&times;</span></button></a>
+				</div>	
+			</div>
+			<!-- End Page Header -->			
+			<!-- Row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card custom-card">
+						<div class="card-body">							
+							<?php $this->load->view('Backend/Elements/Alert.php'); ?>
+							<div class="panel panel-primary">
+								<div class="tab-menu-heading mb-3">
+									<div class="tabs-menu">
+										<!-- Tabs -->
+										<ul class="nav panel-tabs panel-secondary">
+											<li>
+												<a href="#tab9" class="active" data-bs-toggle="tab">General Info.</a>
+											</li>
+											<li>
+												<a href="#tab10" data-bs-toggle="tab">Product Recipe</a>
+											</li>
+											<li>
+												<a href="#tab11" data-bs-toggle="tab">Production operations</a>
+											</li>											
+										</ul>
+									</div>
+								</div>
+								<div class="panel-body tabs-menu-body">
+									<div class="tab-content">
+										<div class="tab-pane active" id="tab9">
+											<form action="<?php echo BASE_URL.$this->page_name?>" method="POST" data-parsley-validate="">
+												<div class="row">	
+													<div class="col-md-6">	
+														<div class="form-group">
+															<label class="form-label">Product name: <span class="tx-danger">*</span></label>
+															<input class="form-control" name="product_name" id="product_name" value="<?php echo set_value('product_name'); ?>" placeholder="Enter product name" required="" type="text">
+														</div>
+														<div class="form-group">
+															<label class="form-label">Category: <span class="tx-danger">*</span></label>
+															<select class="form-control select2-no-search" name="category_id" required>
+																<option value="">Select category</option>
+																<?php foreach($category_list as $obj): ?>
+																<option value="<?php echo $obj->category_id;?>">
+																<?php echo $obj->name;?>
+																</option>
+																<?php endforeach; ?>
+															</select>
+														</div>	
+														
+														<div class="form-group">
+															<label class="form-label">Unit of Measure: <span class="tx-danger">*</span></label>
+															<select class="form-control select2-no-search" name="unit_id" required>
+																<option value="">Select category</option>
+																<?php foreach($uom_list as $obj): ?>
+																<option value="<?php echo $obj->unit_id;?>">
+																<?php echo $obj->unit;?>
+																</option>
+																<?php endforeach; ?>
+															</select>
+														</div>	
+													</div>		
+													<div class="col-md-6">
+														<div class="form-group">
+															<label class="form-label mb-3">Product source:</label>
+															<div class="row">
+																<div class="col-lg-6">
+																	<label class="ckbox"><input type="checkbox" name="make" checked value="Yes" id="make"><span>I make this product</span></label>
+																</div>
+																<div class="col-lg-6 mg-t-20 mg-lg-t-0">
+																	<label class="ckbox"><input checked value="Yes" name="buyu" id="buy" type="checkbox">
+																	<span>I buy this product</span></label>
+																</div>							
+															</div>
+														</div>
+														<div class="form-group supplier-option">
+															<?php echo $supplier_option; ?>
+														</div>
+														<div class="form-group">
+															<label class="form-label mt-4 mb-2">Does this product come in different colors, sizes or similar?</label>
+															<div class="row">
+																<div class="col-lg-12">
+																	<label class="ckbox"><input type="checkbox" name="multiple_variant" value="Yes" id="multiple_variant"><span>Yes, this product has multiple variants</span></label>
+																</div>						
+															</div>
+														</div>
+													</div>
+												</div>
+												
+												<div class="table-responsive mt-4" id="variant_tbl">
+													<table class="table table-bordered text-nowrap">
+														<thead>
+															<tr>
+																<th>Variant code / SKU</th>
+																<th>Default sales price</th>
+																<th>Default lead time (in days)</th>
+																<th>Default purchase price</th>
+																<th>Ingredients cost</th>
+																<th>Operations cost</th>
+																<th>In stock</th>
+															</tr>
+														</thead>
+														<tbody>
+															<td>
+																<input class="form-control no-border" placeholder="Type Variant code / SKU" type="text" name="sku" id="sku">
+															</td>
+															<td>
+																<input class="form-control no-border" placeholder="Type sales price" type="text" name="sales_price" id="sales_price">
+															</td>
+															<td>
+																<input class="form-control no-border" placeholder="Type lead time" type="text" name="lead_time" id="lead_time">
+															</td>
+															<td>
+																<input class="form-control no-border" placeholder="Type purchase price" type="text" name="purchase_price" id="purchase_price">
+															</td>
+															<td class="text-end">0.00</td>
+															<td class="text-end">0.00</td>
+															<td class="text-end">0</td>
+														</tbody>	
+													</table>
+												</div>
+												<div class="row">
+													<div class="col-md-12">
+														<div class="form-group">
+															<label class="form-label mb-3">Additional Info.:</label>
+															<textarea class="content" name="example"></textarea>
+														</div>
+													</div>
+												</div>
+												<button class="btn ripple btn-primary" type="submit">Save</button>
+											</form>
+										</div>
+										<div class="tab-pane" id="tab10">
+											<p> default model text, and a search for 'lorem ipsum' will
+												uncover many web sites still in their infancy. Various
+												versions have evolved over the years, sometimes by accident,
+												sometimes on purpose (injected
+												humour and the like</p>
+											<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
+												diam nonumy eirmod tempor invidunt ut labore et dolore magna
+												aliquyam erat, sed diam voluptua. At veroeoset</p>
+										</div>
+										<div class="tab-pane" id="tab11">
+											<p>over the years, sometimes by accident, sometimes on purpose
+												(injected humour and the like</p>
+											<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
+												diam nonumy eirmod tempor invidunt ut labore et dolore magna
+												aliquyam erat, sed diam voluptua. At veroeoset</p>
+										</div>
+										<div class="tab-pane" id="tab12">
+											<p>page editors now use Lorem Ipsum as their default model text,
+												and a search for 'lorem ipsum' will uncover many web sites
+												still in their infancy. Various versions have evolved over
+												the years, sometimes
+												by accident, sometimes on purpose (injected humour and the
+												like</p>
+											<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
+												diam nonumy eirmod tempor invidunt ut labore et dolore magna
+												aliquyam erat, sed diam voluptua. At veroeoset</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End Row -->
+		</div>
+	</div>
+</div>
+<!-- End Main Content-->
+
+<Style>
+	.table>thead>tr>th{ font-size:13px; font-weight:500; text-transform:unset; }
+	.no-border{ padding:0; border: unset; }
+	.richText .richText-editor{ height:100px;}
+</style>

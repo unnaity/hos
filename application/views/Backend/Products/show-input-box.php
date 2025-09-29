@@ -1,0 +1,10 @@
+<div class="rm-box-<?php echo $this->grn_detail_id?>">
+<?php if($this->no_of_boxes > 0):
+    for($i=1;$i<=$this->no_of_boxes;$i++):
+?>    
+<label class="form-label">Box <?php echo $i; ?>:</label>
+<input class="form-control h-cls" name="box_item_<?php echo $this->grn_detail_id?>[]" id="box_item_<?php echo ($this->grn_detail_id.'_'.$i)?>" value="" required="" type="number" min="1">    
+<?php endfor; 
+else: ?>
+<?php endif; ?>
+</div>
