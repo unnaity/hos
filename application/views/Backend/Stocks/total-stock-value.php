@@ -4,7 +4,7 @@
 		<div class="main-container container-fluid">
 			<!-- Page Header -->
 			<div class="page-header">
-				<h3 class="text-start"><?php echo UCWORDS(str_replace('-', ' ',$this->page_name)); ?></h3>
+				<h3 class="text-start"><?php echo "Total Stock"; ?></h3>
 				
 			</div>
 				

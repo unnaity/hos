@@ -62,6 +62,7 @@
                                             <th>Location Name</th>
 											<th>Material Name</th>
 											<th>Item Name</th>
+											<th>Item Code</th>
                                             <th>Box No.</th>
 										</tr>
 									</thead>
@@ -73,6 +74,7 @@
                                             <td><?php echo $obj->location_name ?></td>
                                             <td><?php echo strtoupper($obj->grn_type) ?></td>
 											<td><?php echo strtoupper($obj->item_name) ?></td>
+											<td><?php echo $obj->item_code ?></td>
 											<td><?php echo $obj->box_no ?></td>
 											
 										</tr>

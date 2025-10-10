@@ -42,13 +42,13 @@
 													<td><?php echo strtoupper($obj->unit) ?></td>
 													<td>
 														<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit RM" onclick="show_edit_popup(
-															'<?php echo $obj->raw_material_id ?>',
-															'<?php echo htmlspecialchars($obj->raw_material_name); ?>',
-															'<?php echo htmlspecialchars($obj->raw_material_code); ?>',
-															'<?php echo $obj->unit ?>'
-															'<?php echo $obj->sustainability_score ?>',
-															'<?php echo $obj->weight ?>'
-														)"><i class="fe fe-edit"></i></a>
+																'<?php echo $obj->raw_material_id ?>',
+																'<?php echo htmlspecialchars($obj->raw_material_name); ?>',
+																'<?php echo htmlspecialchars($obj->raw_material_code); ?>',
+																'<?php echo $obj->unit ?>',
+																'<?php echo $obj->sustainability_score ?>',
+																'<?php echo $obj->weight ?>'
+															)"><i class="fe fe-edit"></i></a>
 
 														<button id="bDel" type="button" onclick="confirm_modal('<?php echo BASE_URL . 'raw-material-delete/' . $obj->raw_material_id ?>');" class="btn btn-sm btn-danger" title="Delete">
 															<i class="fe fe-trash-2"> </i>

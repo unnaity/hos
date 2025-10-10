@@ -62,6 +62,7 @@
 											<th>Sl No.</th>
                                             <th>GRN No.</th>
                                             <th>Item Name</th>
+											<th>Item Code</th>
 											<th>Vendor Name</th>
 											<th>No. of Boxes</th>
                                             <th>GRN Date</th>
@@ -77,6 +78,7 @@
 											<td><?php echo $i++; ?></td>
                                             <td><?php echo $obj->sfg_grn_no ?></td>
 											<td><?php echo $obj->item_name?></td>
+											<td><?php echo $obj->item_code?></td>
 											<td><?php echo $obj->company_name?></td>
 											<td><?php echo $obj->no_of_boxes?></td>
 											<td><?php echo $obj->grn_date?></td>
