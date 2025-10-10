@@ -939,80 +939,80 @@ $(document).ready(function ($) {
     });
 });
 
-function check_quality_form() {
+// function check_quality_form() {
 
-    var product_grn_id = $('#product_grn_id').val();
-    var no_of_items = $('.no_of_items').val();
-    var no_of_boxes = $('.no_of_boxes').val();
-    var quality_checked_item = $('.quality_checked_item').val();
-    var supplier_id = $("#supplier_id").val();
-    var mfg_date = $("#mfg_date").val();
-    var expiry_date = $("#expiry_date").val();
-    var error = 0;
-    var supplier_name = $('#supplier_id option:selected').text();
+//     var product_grn_id = $('#product_grn_id').val();
+//     var no_of_items = $('.no_of_items').val();
+//     var no_of_boxes = $('.no_of_boxes').val();
+//     var quality_checked_item = $('.quality_checked_item').val();
+//     var supplier_id = $("#supplier_id").val();
+//     var mfg_date = $("#mfg_date").val();
+//     var expiry_date = $("#expiry_date").val();
+//     var error = 0;
+//     var supplier_name = $('#supplier_id option:selected').text();
 
-    var product_grn_detail_id = [];
-    $.each($("input[name='product_grn_detail_id[]']"), function () {
-        product_grn_detail_id.push($(this).val());
-    });
+//     var product_grn_detail_id = [];
+//     $.each($("input[name='product_grn_detail_id[]']"), function () {
+//         product_grn_detail_id.push($(this).val());
+//     });
 
-    var no_of_items = [];
-    $.each($("input[name='no_of_items[]']"), function () {
-        no_of_items.push($(this).val());
-    });
+//     var no_of_items = [];
+//     $.each($("input[name='no_of_items[]']"), function () {
+//         no_of_items.push($(this).val());
+//     });
 
-    var no_of_boxes = [];
-    $.each($("input[name='no_of_boxes[]']"), function () {
-        no_of_boxes.push($(this).val());
-    });
+//     var no_of_boxes = [];
+//     $.each($("input[name='no_of_boxes[]']"), function () {
+//         no_of_boxes.push($(this).val());
+//     });
 
-    var quality_checked_item = [];
-    $.each($("input[name='quality_checked_item[]']"), function () {
-        quality_checked_item.push($(this).val());
-    });
+//     var quality_checked_item = [];
+//     $.each($("input[name='quality_checked_item[]']"), function () {
+//         quality_checked_item.push($(this).val());
+//     });
 
-    var total_items = 0;
-    $.each(quality_checked_item, function () { total_items += parseFloat(this) || 0; });
+//     var total_items = 0;
+//     $.each(quality_checked_item, function () { total_items += parseFloat(this) || 0; });
 
-    for (var i = 0; i < quality_checked_item.length; i++) {
-        if (quality_checked_item[i] > no_of_items[i]) {
-            error = 1;
-        }
-    }
-    if (error) {
-        $("#js-error-msg").text("No. of quality checked item must be less than or equal to no. of GRN items.");
-        $("#h-id").show();
-        return false;
-    } else {
-        $("#js-error-msg").text("");
-        $("#h-id").hide();
-    }
-    total_box_val = 0;
-    for (var i = 0; i <= no_of_boxes.length; i++) {
-        for (var j = 1; j <= no_of_boxes[i]; j++) {
-            var box_val = $("#box_item_" + product_grn_detail_id[i] + "_" + j).val();
-            if (box_val > 0) {
-                total_box_val = parseInt(total_box_val) + parseInt(box_val);
-                console.log(total_box_val);
-            } else {
-                $("#js-error-msg").text("Please enter no. of item in Box.");
-                $("#h-id").show();
-            }
-        }
-    }
+//     for (var i = 0; i < quality_checked_item.length; i++) {
+//         if (quality_checked_item[i] > no_of_items[i]) {
+//             error = 1;
+//         }
+//     }
+//     if (error) {
+//         $("#js-error-msg").text("No. of quality checked item must be less than or equal to no. of GRN items.");
+//         $("#h-id").show();
+//         return false;
+//     } else {
+//         $("#js-error-msg").text("");
+//         $("#h-id").hide();
+//     }
+//     total_box_val = 0;
+//     for (var i = 0; i <= no_of_boxes.length; i++) {
+//         for (var j = 1; j <= no_of_boxes[i]; j++) {
+//             var box_val = $("#box_item_" + product_grn_detail_id[i] + "_" + j).val();
+//             if (box_val > 0) {
+//                 total_box_val = parseInt(total_box_val) + parseInt(box_val);
+//                 console.log(total_box_val);
+//             } else {
+//                 $("#js-error-msg").text("Please enter no. of item in Box.");
+//                 $("#h-id").show();
+//             }
+//         }
+//     }
 
-    if (total_box_val != total_items) {
-        $("#js-error-msg").text("Total no. of items and sum of boxes value does not match.");
-        $("#h-id").show();
-        error = 1;
-    }
-    console.log(error);
-    if (error) {
-        return false;
-    } else {
-        return true;
-    }
-}
+//     if (total_box_val != total_items) {
+//         $("#js-error-msg").text("Total no. of items and sum of boxes value does not match.");
+//         $("#h-id").show();
+//         error = 1;
+//     }
+//     console.log(error);
+//     if (error) {
+//         return false;
+//     } else {
+//         return true;
+//     }
+// }
 
 function update_purchase_price(product_grn_detail_id) {
     var purchase_price_per_item = $("#purchase_price_per_item_" + product_grn_detail_id).val();
@@ -2018,7 +2018,6 @@ $(".qc_no_of_boxes").on('change', function () {
     }
 });
 /*********** Create Sfg Grn ****************************/
-// Global scope
 var item_id_array = [];
 var item_index = 0;
 
@@ -2081,6 +2080,27 @@ $(document).ready(function () {
             $('.rm-box').remove();
             return;
         }
+        total_box_val = 0;
+        for (var i = 0; i <= grn_no_of_boxes.length; i++) {
+            for (var j = 1; j <= grn_no_of_boxes[i]; j++) {
+                var box_val = $("#box_item_" + item_id[i] + "_" + j).val();
+                if (box_val > 0) {
+                    total_box_val = parseInt(total_box_val) + parseInt(box_val);
+                    console.log(total_box_val);
+                } else {
+                    $("#js-error-msg").text("Please enter no. of item in Box.");
+                    $("#h-id").show();
+                }
+            }
+        }
+
+        if (total_box_val != quantity) {
+            $("#js-error-msg").text("Total quantity and sum of boxes value does not match.");
+            $("#h-id").show();
+            error = 1;
+            return;
+        }
+        
 
         let hiddenBoxInputs = `
             <input type="hidden" name="items[${item_index}][sfg_id]" value="${item_id}">
@@ -2120,7 +2140,7 @@ $(document).ready(function () {
         let hiddenDiv = `<div id="hidden_${item_id}">${hiddenBoxInputs}</div>`;
 
         $("#grn-tbl tbody").append(newRow);
-        $("#hidden-inputs").append(hiddenDiv);  
+        $("#hidden-inputs").append(hiddenDiv);
         $(".hid-tbl").show();
 
         item_id_array.push(item_id);
@@ -2130,14 +2150,14 @@ $(document).ready(function () {
         $('#quantity').val('');
         $('#item_id').val('');
         $('#grn_no_of_boxes_' + item_id).val('');
-        $('.rm-box').remove(); 
+        $('.rm-box').remove();
     });
 });
 
 // Remove row function
 function removeItem(item_id) {
     $("#tr_" + item_id).remove();
-    $("#hidden_" + item_id).remove(); 
+    $("#hidden_" + item_id).remove();
     item_id_array = item_id_array.filter(id => id !== item_id);
 
     if ($("#grn-tbl tbody tr").length === 0) {
@@ -2198,23 +2218,23 @@ $("#sfg_grn_id").on('change', function () {
     });
 });
 $(".grn_no_of_boxes").on('change', function () {
-        var no_of_boxes = $(this).val();
-        var item_id = $('#item_id').val();
-        console.log(no_of_boxes);
-        if (no_of_boxes != '') {
-            $.ajax({
-                type: 'POST',
-                url: base_url + 'show-input-sfg-box',
-                data: { no_of_boxes: no_of_boxes, item_id: item_id },
-                success: function (htmlresponse) {
-                    $('.rm-box').remove();
-                    $('#box_no').after(htmlresponse);
-                }
-            });
-        } else {
-            $('.rm-box').remove();
-        }
-    });
+    var no_of_boxes = $(this).val();
+    var item_id = $('#item_id').val();
+    console.log(no_of_boxes);
+    if (no_of_boxes != '') {
+        $.ajax({
+            type: 'POST',
+            url: base_url + 'show-input-sfg-box',
+            data: { no_of_boxes: no_of_boxes, item_id: item_id },
+            success: function (htmlresponse) {
+                $('.rm-box').remove();
+                $('#box_no').after(htmlresponse);
+            }
+        });
+    } else {
+        $('.rm-box').remove();
+    }
+});
 
 
 
@@ -2276,7 +2296,7 @@ var combination_array = [];
 $("#create-bom").on('click', function () {
     var sfg_id = $('#item_id').val();
     var sfg_name = $('#item_id option:selected').text();
-    
+
     var bom_id = $('#bom_id').val();
     var bom_name = $('#bom_id option:selected').text();
     var grn_type_text = $('#grn_type option:selected').text();
@@ -2307,7 +2327,7 @@ $("#create-bom").on('click', function () {
     } else {
         combination_array.push(combination_key);
         $("#h-id").hide();
-        $("#js-error-msg").text(""); // Clear on success
+        $("#js-error-msg").text(""); 
         $(".hid-tbl").show();
 
         $(".h-id").hide();
@@ -2379,13 +2399,13 @@ $("#edit-bom").on('click', function () {
     $(".h-id").hide();
     $(".hid-tbl").show();
 
-   var newRowContent = "<tr>" +
-    "<td><input type=\"hidden\" name=\"bom_id[]\" value=\"" + bom_id + "\">" + bom_name + "</td>" +
-    "<td><input type=\"hidden\" name=\"grn_type[]\" value=\"" + grn_type_value + "\">" + grn_type_text + "</td>" +
-    "<td><input type=\"hidden\" name=\"item_id[]\" value=\"" + sfg_id + "\">" + sfg_name + "</td>" +
-    "<td><input type=\"number\" name=\"sfg_qty[]\" value=\"" + sfg_qty + "\" class=\"form-control qty-input\" style=\"width: 70px; height: 30px; padding: 5px; color: #000; border: 1px solid #ccc;\"></td>" +
-    "<td><button type=\"button\" class=\"btn btn-danger remove-bom-row\"><span class=\"fe fe-trash-2\"></span></button></td>" +
-    "</tr>";
+    var newRowContent = "<tr>" +
+        "<td><input type=\"hidden\" name=\"bom_id[]\" value=\"" + bom_id + "\">" + bom_name + "</td>" +
+        "<td><input type=\"hidden\" name=\"grn_type[]\" value=\"" + grn_type_value + "\">" + grn_type_text + "</td>" +
+        "<td><input type=\"hidden\" name=\"item_id[]\" value=\"" + sfg_id + "\">" + sfg_name + "</td>" +
+        "<td><input type=\"number\" name=\"sfg_qty[]\" value=\"" + sfg_qty + "\" class=\"form-control qty-input\" style=\"width: 70px; height: 30px; padding: 5px; color: #000; border: 1px solid #ccc;\"></td>" +
+        "<td><button type=\"button\" class=\"btn btn-danger remove-bom-row\"><span class=\"fe fe-trash-2\"></span></button></td>" +
+        "</tr>";
 
 
     $("#bom-tbl tbody").append(newRowContent);
@@ -2427,7 +2447,7 @@ function show_sfg_edit_popup(id, name, code, score, weight) {
     $("#u_weight").val(weight);
 }
 function show_fg_edit_popup(id, code, description) {
-    console.log("Edit popup values:", id,  code, description);
+    console.log("Edit popup values:", id, code, description);
     jQuery('#edit-fg').modal('show', { backdrop: 'static' });
     $("#fg_id").val(id);
     $("#fgs_code").val(code);
@@ -2556,8 +2576,8 @@ $(document).ready(function ($) {
         var gi_box_no = $(this).val();
         var fg_id = $('#fg_id').val();
         var fg_quantity = $('#fg_quantity').val();
-        var general_issue_id = $('#general_issue_id').val(); 
-        var rm_count_id = $('#rm_count_id').val(); 
+        var general_issue_id = $('#general_issue_id').val();
+        var rm_count_id = $('#rm_count_id').val();
         // alert(rm_count_id);
 
         $("#gi_box_detail").html("").hide();
@@ -2659,13 +2679,14 @@ $(document).on('change', '#gi_qty', function () {
     var fgRow = $(".fg-row[data-item-id='" + item_id + "']");
     var issuedQty = parseInt(fgRow.find(".issued-qty").text());
     var scannedQty = parseInt(fgRow.find(".scanned-qty").text());
-
+    // alert(issuedQty);
+    // alert(scannedQty);
     if ((scanned_qty + quantity) > issue_qty) {
         $("#js-error-msg").text("Entered quantity cannot exceed remaining issued quantity.");
         $("#h-id").show();
         return;
     }
-    if (scanned_qty >= issue_qty) {
+    if (scanned_qty === issue_qty) {
         $("#js-error-msg").text("Scanned quantity already matches issued quantity for this item.");
         $("#h-id").show();
         return;
@@ -2751,7 +2772,7 @@ $(document).on('change', '#gi_qty', function () {
                     });
 
                     if (allMatched) {
-                        // ✅ Show success message before reloading
+
                         $("#js-error-msg").text("Successfully dispatched.").css("color", "green");
                         $("#h-id").show();
 
