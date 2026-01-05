@@ -25,6 +25,7 @@
 											<th>No. of Boxes</th>
                                             <th>Total Items</th>
 											<th>Remaining Items</th>
+											<th>Location</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -38,6 +39,7 @@
 											<td><?php echo $obj->number_of_boxes; ?></td>
 											<td><?php echo $obj->total_item; ?></td>
 											<td><?php echo $obj->remaining_item; ?></td>
+											<td><?php echo $obj->locations; ?></td>
 										</tr>
 									<?php $i++; endforeach;
 									else: echo "<tr><td colspan='3'>No record found!</td></tr>";

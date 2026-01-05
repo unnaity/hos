@@ -184,16 +184,21 @@ $route['rm-grn-list'] = "Raw_material/index/rm-grn-list";
 $route['rm-put-away-list'] = "Raw_material/index/rm-put-away-list";
 $route['rm-create-put-away'] = "Raw_material/index/rm-create-put-away";
 $route['get-rm-unit'] = "Raw_material/index/get-rm-unit";
+$route['raw-material-edit'] = "Raw_material/index/raw-material-edit";
 $route['raw-material-delete/(:any)'] = "Raw_material/index/raw-material-delete/$1";
 $route['raw-material-edit/(:any)'] = "Raw_material/index/raw-material-edit/$1";
 $route['add-fg'] = "Raw_material/index/add-fg";
+$route['edit-fg'] = "Raw_material/index/edit-fg";
 $route['fg-list'] = "Raw_material/index/fg-list";
 $route['general-issue-detail/(:any)'] = "Pick_list/index/general-issue-detail/$1";
 $route['delete-bom/(:any)'] = "Raw_material/index/delete-bom/$1";
 
 $route['fg-alias/(:any)'] = "Raw_material/index/fg-alias/$1";
+$route['fg-alias-list'] = "Raw_material/index/fg-alias-list";
 $route['delete-fg-alias/(:any)'] = "Raw_material/index/delete-fg-alias/$1";
+$route['delete-alias/(:any)'] = "Raw_material/index/delete-alias/$1";
 $route['get-unit-list'] = "Semi_finish_good/index/get-unit-list";
+$route['get-unit-dropdown'] = "Semi_finish_good/index/get-unit-dropdown";
 
 $route['create-bom'] = "Raw_material/index/create-bom";
 $route['bom-list'] = "Raw_material/index/bom-list";

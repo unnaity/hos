@@ -25,30 +25,34 @@
 											<th>RM Name</th>
 											<th>RM Code</th>
 											<th>Sustainability Score</th>
+											<th>Price</th>
 											<th>Weight</th>
 											<th>Unit</th>
 											<th>Action</th>
 										</tr>
 									</thead>
 									<tbody>
-										<?php if ($this->raw_material_list): $i = 1;
+										<?php if ($this->raw_material_list): 
+											$i = 1;
 											foreach ($this->raw_material_list as $obj): ?>
 												<tr>
 													<td> <?php echo $i++; ?> </td>
 													<td><?php echo $obj->raw_material_name ?></td>
 													<td><?php echo $obj->raw_material_code ?></td>
 													<td><?php echo $obj->sustainability_score ?></td>
+													<td><?php echo $obj->price ?></td>
 													<td><?php echo $obj->weight ?></td>
 													<td><?php echo strtoupper($obj->unit) ?></td>
 													<td>
 														<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit RM" onclick="show_edit_popup(
-																'<?php echo $obj->raw_material_id ?>',
-																'<?php echo htmlspecialchars($obj->raw_material_name); ?>',
-																'<?php echo htmlspecialchars($obj->raw_material_code); ?>',
-																'<?php echo $obj->unit ?>',
-																'<?php echo $obj->sustainability_score ?>',
-																'<?php echo $obj->weight ?>'
-															)"><i class="fe fe-edit"></i></a>
+															'<?php echo $obj->raw_material_id ?>',
+															'<?php echo htmlspecialchars($obj->raw_material_name); ?>',
+															'<?php echo htmlspecialchars($obj->raw_material_code); ?>',
+															'<?php echo $obj->sustainability_score ?: "0"; ?>',
+															'<?php echo $obj->price ?>',
+															'<?php echo $obj->unit_id ?>',
+															'<?php echo $obj->weight ?>'
+														)"><i class="fe fe-edit"></i></a>
 
 														<button id="bDel" type="button" onclick="confirm_modal('<?php echo BASE_URL . 'raw-material-delete/' . $obj->raw_material_id ?>');" class="btn btn-sm btn-danger" title="Delete">
 															<i class="fe fe-trash-2"> </i>

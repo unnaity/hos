@@ -2080,26 +2080,26 @@ $(document).ready(function () {
             $('.rm-box').remove();
             return;
         }
-        total_box_val = 0;
-        for (var i = 0; i <= grn_no_of_boxes.length; i++) {
-            for (var j = 1; j <= grn_no_of_boxes[i]; j++) {
-                var box_val = $("#box_item_" + item_id[i] + "_" + j).val();
-                if (box_val > 0) {
-                    total_box_val = parseInt(total_box_val) + parseInt(box_val);
-                    console.log(total_box_val);
-                } else {
-                    $("#js-error-msg").text("Please enter no. of item in Box.");
-                    $("#h-id").show();
-                }
-            }
-        }
+        // total_box_val = 0;
+        // for (var i = 0; i <= grn_no_of_boxes.length; i++) {
+        //     for (var j = 1; j <= grn_no_of_boxes[i]; j++) {
+        //         var box_val = $("#box_item_" + item_id[i] + "_" + j).val();
+        //         if (box_val > 0) {
+        //             total_box_val = parseInt(total_box_val) + parseInt(box_val);
+        //             console.log(total_box_val);
+        //         } else {
+        //             $("#js-error-msg").text("Please enter no. of item in Box.");
+        //             $("#h-id").show();
+        //         }
+        //     }
+        // }
 
-        if (total_box_val != quantity) {
-            $("#js-error-msg").text("Total quantity and sum of boxes value does not match.");
-            $("#h-id").show();
-            error = 1;
-            return;
-        }
+        // if (total_box_val != quantity) {
+        //     $("#js-error-msg").text("Total quantity and sum of boxes value does not match.");
+        //     $("#h-id").show();
+        //     error = 1;
+        //     return;
+        // }
         
 
         let hiddenBoxInputs = `
@@ -2426,34 +2426,58 @@ function delete_td(bom_id) {
     }
 }
 
-function show_edit_popup(id, name, code, score, weight) {
-    console.log("Edit popup values:", id, name, code, score, weight, unit);
-    jQuery('#raw-material-edit').modal('show', { backdrop: 'static' });
+function show_edit_popup(id, name, code, score, price, unit_id, weight) {
+    console.log("Edit popup values:", id, name, code, score, unit_id, weight);
+
+    $('#raw-material-edit').modal('show', { backdrop: 'static' });
+
     $("#raw_material_id").val(id);
     $("#rm_name").val(name);
     $("#rm_code").val(code);
     $("#s_score").val(score);
-    $("#unit").val(unit);
+    $("#_price").val(price);
     $("#unit_weight").val(weight);
-}
 
-function show_sfg_edit_popup(id, name, code, score, weight) {
-    console.log("Edit popup values:", id, name, code, score, weight);
-    jQuery('#edit-sfg').modal('show', { backdrop: 'static' });
+    loadUnitsDropdown(unit_id);
+}
+function show_sfg_edit_popup(id, name, code, score, unit_id, weight) {
+    console.log("Edit popup values:", id, name, code, score, unit_id, weight);
+
+    $('#edit-sfg').modal('show', { backdrop: 'static' });
+
     $("#sfg_id").val(id);
     $("#sfgs_name").val(name);
     $("#sfgs_code").val(code);
     $("#su_score").val(score);
     $("#u_weight").val(weight);
+
+    loadUnitsDropdown(unit_id);
 }
-function show_fg_edit_popup(id, code, description) {
-    console.log("Edit popup values:", id, code, description);
+
+function show_fg_edit_popup(id, code, sales_edit_qty, description) {
+    console.log("Edit popup values:", id, code, sales_edit_qty, description);
+
+    // Show the modal
     jQuery('#edit-fg').modal('show', { backdrop: 'static' });
+
+    // Set the values in the form
     $("#fg_id").val(id);
     $("#fgs_code").val(code);
-    $("#su_score").val(score);
-    $("#u_weight").val(weight);
+    $("#fgs_description").val(description);
+
+    // Map sales_edit_qty (string like 'Pcs') to corresponding numeric value (1)
+    var qtyValue = 1;  // Default to 'Pcs' value (1)
+    if (sales_edit_qty === 'Pair') {
+        qtyValue = 2;
+    } else if (sales_edit_qty === 'Set') {
+        qtyValue = 3;
+    }
+
+    // Set the dropdown value
+    $("#fg_sales_qty").val(qtyValue);  
 }
+
+
 
 
 
@@ -2626,12 +2650,12 @@ $(document).ready(function ($) {
 
 
 
-$(document).ready(function () {
-    // When modal opens or page loads
-    loadUnitsDropdown();
-});
+// $(document).ready(function () {
+//     // When modal opens or page loads
+//     loadUnitsDropdown();
+// });
 
-function loadUnitsDropdown() {
+function loadUnitsDropdown(selectedUnitId = '') {
     $.ajax({
         url: base_url + 'get-unit-list',
         type: "GET",
@@ -2640,18 +2664,43 @@ function loadUnitsDropdown() {
             if (res.status == 1) {
                 var unitOptions = '<option value="">Select Unit</option>';
                 $.each(res.data, function (index, unit) {
-                    unitOptions += '<option value="' + unit.unit_id + '">' + unit.unit + '</option>';
+                    unitOptions += '<option value="' + unit.unit_id + '"'
+                        + (unit.unit_id == selectedUnitId ? ' selected' : '') + '>'
+                        + unit.unit + '</option>';
                 });
-                $('select[name="unit_id"]').html(unitOptions);
+                $('select[name="unit"]').html(unitOptions);
             } else {
                 alert("Failed to load units.");
             }
         },
-        error: function () {
-            alert("Something went wrong while loading units.");
-        }
+        
     });
 }
+$(document).ready(function () {
+    loadUnitsDropdownForAdd();
+ });
+
+function loadUnitsDropdownForAdd() {
+    $.ajax({
+        url: base_url + 'get-unit-dropdown',
+        type: "GET",
+        dataType: "json",
+        success: function (res) {
+            if (res.status == 1) {
+                var unitOptions = '<option value="">Select Unit</option>';
+                $.each(res.data, function (index, unit) {
+                    unitOptions += '<option value="' + unit.unit_id + '">' + unit.unit + '</option>';
+                });
+                $('#unit_id').html(unitOptions);
+            } else {
+                alert("Failed to load units.");
+            }
+        },
+        
+    });
+}
+
+
 $(document).on('change', '#gi_qty', function () {
     var fg_id = $("#fg_id").val();
     var fg_name = $('#fg_id option:selected').text();

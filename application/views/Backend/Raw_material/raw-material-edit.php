@@ -2,7 +2,7 @@
 <div class="modal" id="raw-material-edit">
 	<div class="modal-dialog " role="document">
 		<div class="modal-content modal-content-demo">
-			<form action="<?php echo BASE_URL.'raw-material-list'?>" method="POST" id="Edit RM" data-parsley-validate="">
+			<form action="<?php echo BASE_URL.'raw-material-edit'?>" method="POST" id="Edit RM" data-parsley-validate="">
 				<div class="modal-header">
 					<h6 class="modal-title">Edit RM</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
 				</div>
@@ -28,6 +28,12 @@
 						</div>
 						<div class="col-md-6 mg-t-5 mg-md-t-5">	
 							<input type="text" class="form-control" name="s_score" id="s_score" required="" placeholder="Enter sustanability score">
+						</div>
+						 <div class="col-md-4">
+							<label class="form-label">Price: <span class="tx-danger">*</span></label>
+						</div>
+						<div class="col-md-6 mg-t-5 mg-md-t-5">	
+							<input type="text" class="form-control" name="_price" id="_price" required="" placeholder="Enter price">
 						</div>
 						<div class="col-md-4">
 							<label class="form-label">Unit: <span class="tx-danger">*</span></label>

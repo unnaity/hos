@@ -49,7 +49,10 @@ class Raw_material extends CI_Controller
                 exit;
                 break;
             case 'raw-material-edit':
-                $this->raw_material_edit($this->raw_material_id);
+                $this->raw_material_edit();exit;
+                break;
+            case 'edit-fg':
+                $this->edit_fg();exit;
                 break;
             case 'get-rm-hsn-code':
                 $this->get_rm_hsn_code();
@@ -119,6 +122,9 @@ class Raw_material extends CI_Controller
                 $this->fg_id = $this->uri->segment(2);
                 $this->fg_alias($this->fg_id);
                 break;
+            case 'fg-alias-list':
+                $this->fg_alias_list();
+                break;
             case 'get-bom-items':
                 $this->get_bom_items();
                 exit;
@@ -126,6 +132,14 @@ class Raw_material extends CI_Controller
             case 'delete-fg-alias':
                 $this->product_alias_id = $this->uri->segment(2);
                 $this->delete_fg_alias($this->product_alias_id);exit;
+                break;
+            case 'delete-fg':
+                $this->fg_id = $this->uri->segment(2);
+                $this->delete_fg($this->fg_id);exit;
+                break;
+            case 'delete-alias':
+                $this->product_alias_id = $this->uri->segment(2);
+                $this->delete_alias($this->product_alias_id);exit;
                 break;
             default:
                 break;
@@ -223,6 +237,7 @@ class Raw_material extends CI_Controller
             $this->form_validation->set_rules('raw_material_name', 'Raw material name', 'trim|required');
             $this->form_validation->set_rules('raw_material_code', 'Raw material code', 'trim|required');
             $this->form_validation->set_rules('sustainability_score', 'Sustainability score', 'trim');
+            $this->form_validation->set_rules('price', 'Price', 'trim|required');
             $this->form_validation->set_rules('weight', 'Weight', 'trim|required');
             $this->form_validation->set_rules('unit_id', 'Unit Id', 'trim|required');
             $this->form_validation->set_rules('additional_info', 'additional info', 'trim');
@@ -241,6 +256,7 @@ class Raw_material extends CI_Controller
                 $raw_material_code = $this->input->post('raw_material_code');
                 $sustainability_score = $this->input->post('sustainability_score');
                 $weight = $this->input->post('weight');
+                $price = $this->input->post('price');
                 $raw_material_name = $this->input->post('raw_material_name');
                 $additional_info = $this->input->post('additional_info');
 
@@ -256,6 +272,7 @@ class Raw_material extends CI_Controller
                         'outward_unit_id' => $outward_unit_id,
                         'wastage' => $wastage,
                         'weight' => $weight,
+                        'price' => $price,
                         'unit_id' => $unit_id,
                         'sustainability_score' => $sustainability_score,
                         'raw_material_name' => $raw_material_name,
@@ -309,31 +326,34 @@ class Raw_material extends CI_Controller
         redirect(BASE_URL . 'raw-material-list', 'refresh');
     }
 
-    function raw_material_edit($raw_material_id)
+    function raw_material_edit()
     {
         if ($this->input->post()) {
-            $this->form_validation->set_rules('raw_material_name', 'Raw material name', 'trim|required');
-            $this->form_validation->set_rules('raw_material_code', 'Raw material code', 'trim|required');
-            $this->form_validation->set_rules('sustainability_score', 'Sustainability score', 'trim');
-            $this->form_validation->set_rules('weight', 'Weight', 'trim|required');
-            $this->form_validation->set_rules('additional_info', 'additional info', 'trim');
-            $this->form_validation->set_rules('unit_id', 'Unit Id', 'trim|required');
+            // pr($this->input->post());
+            $this->form_validation->set_rules('rm_name', 'Rm name', 'trim|required');
+            $this->form_validation->set_rules('rm_code', 'Rm code', 'trim|required');
+            $this->form_validation->set_rules('s_score', 'S score', 'trim');
+            $this->form_validation->set_rules('_price', 'Price', 'trim|required');
+            $this->form_validation->set_rules('unit_weight', 'Unit Weight', 'trim|required');
+            $this->form_validation->set_rules('unit', 'Unit Id', 'trim|required');
 
             if ($this->form_validation->run()) {
 
                 $category_id = $this->input->post('category_id');
+                $raw_material_id = $this->input->post('raw_material_id');
                 $size = $this->input->post('size_id');
                 $hsn_code = $this->input->post('hsn_code');
-                $unit_id = $this->input->post('unit_id');
+                $unit_id = $this->input->post('unit');
                 $min_level = $this->input->post('min_level');
                 $max_level = $this->input->post('max_level');
                 $inward_unit_id = $this->input->post('inward_unit_id');
                 $outward_unit_id = $this->input->post('outward_unit_id');
                 $wastage = $this->input->post('wastage');
-                $raw_material_code = $this->input->post('raw_material_code');
-                $sustainability_score = $this->input->post('sustainability_score');
-                $weight = $this->input->post('weight');
-                $raw_material_name = $this->input->post('raw_material_name');
+                $raw_material_code = $this->input->post('rm_code');
+                $sustainability_score = $this->input->post('s_score');
+                $weight = $this->input->post('unit_weight');
+                $raw_material_name = $this->input->post('rm_name');
+                $price = $this->input->post('_price');
                 $additional_info = $this->input->post('additional_info');
 
                 $raw_material_detail = $this->Raw_material->add_raw_material(
@@ -344,6 +364,7 @@ class Raw_material extends CI_Controller
                         'max_level' => $max_level,
                         'inward_unit_id' => $inward_unit_id,
                         'size' => $size,
+                        'price' => $price,
                         'hsn_code' => $hsn_code,
                         'outward_unit_id' => $outward_unit_id,
                         'wastage' => $wastage,
@@ -361,13 +382,10 @@ class Raw_material extends CI_Controller
 
                 if ($raw_material_detail->action == 1) {
                     $this->session->set_flashdata('success_message', $raw_material_detail->message);
-                    redirect(BASE_URL . 'raw-material-edit/' . $this->raw_material_id, 'refresh');
                 } else if ($raw_material_detail->action == 0) {
                     $this->session->set_flashdata('error_message', $raw_material_detail->message);
-                    redirect(BASE_URL . 'raw-material-edit/' . $this->raw_material_id, 'refresh');
                 } else {
                     $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
-                    redirect(BASE_URL . 'raw-material-edit/' . $this->raw_material_id, 'refresh');
                 }
             }
         }
@@ -377,6 +395,7 @@ class Raw_material extends CI_Controller
                 'result_type' => $this->row_type
             )
         );
+        redirect(BASE_URL . 'raw-material-list', 'refresh');
     }
 
     function get_rm_hsn_code()
@@ -683,12 +702,19 @@ class Raw_material extends CI_Controller
                 $fg_code = $this->input->post('fg_code');
                 $sales_qty = $this->input->post('sales_qty');
                 $description = $this->input->post('description');
+                if ($sales_qty == 1) {
+                $sales_qty_name = 'Pcs';
+                    } elseif ($sales_qty == 2) {
+                        $sales_qty_name = 'Pair';
+                    } elseif ($sales_qty == 3) {
+                        $sales_qty_name = 'Set';
+                    }
 
                 $fg_detail = $this->Raw_material->add_fg(
                     array(
                         'store_id' => $this->store_id,
                         'fg_code' => $fg_code,
-                        'sales_qty' => $sales_qty,
+                        'sales_qty' => $sales_qty_name,
                         'description' => $description,
                         'created_by' => $this->user_id
                     )
@@ -710,21 +736,29 @@ class Raw_material extends CI_Controller
     function edit_fg()
     {
         if ($this->input->post()) {
-            $this->form_validation->set_rules('fg_code', 'Fg code', 'trim|required');
-            $this->form_validation->set_rules('sales_qty', 'Sales qty', 'trim|required');
-            $this->form_validation->set_rules('description', 'Description', 'trim|required');
+            $this->form_validation->set_rules('fgs_code', 'Fg code', 'trim|required');
+            $this->form_validation->set_rules('fg_sales_qty', 'Fg Sales qty', 'trim|required');
+            $this->form_validation->set_rules('fgs_description', 'Fg Description', 'trim|required');
 
             if ($this->form_validation->run()) {
 
-                $fg_code = $this->input->post('fg_code');
-                $sales_qty = $this->input->post('sales_qty');
-                $description = $this->input->post('description');
-
+                $fg_code = $this->input->post('fgs_code');
+                $sales_qty = $this->input->post('fg_sales_qty');
+                $description = $this->input->post('fgs_description');
+                $fg_id = $this->input->post('fg_id');
+                 if ($sales_qty == 1) {
+                $sales_qty_name = 'Pcs';
+                    } elseif ($sales_qty == 2) {
+                        $sales_qty_name = 'Pair';
+                    } elseif ($sales_qty == 3) {
+                        $sales_qty_name = 'Set';
+                    }
                 $fg_detail = $this->Raw_material->add_fg(
                     array(
                         'store_id' => $this->store_id,
                         'fg_code' => $fg_code,
-                        'sales_qty' => $sales_qty,
+                        'fg_id' => $fg_id,
+                        'sales_qty' => $sales_qty_name,
                         'description' => $description,
                         'created_by' => $this->user_id
                     )
@@ -732,17 +766,17 @@ class Raw_material extends CI_Controller
 
                 if ($fg_detail->action == 1) {
                     $this->session->set_flashdata('success_message', $fg_detail->message);
-                    redirect(BASE_URL . 'fg-list', 'refresh');
                 } else if ($fg_detail->action == 0) {
                     $this->session->set_flashdata('error_message', $fg_detail->message);
-                    redirect(BASE_URL . 'fg-list', 'refresh');
                 } else {
                     $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
-                    redirect(BASE_URL . 'fg-list', 'refresh');
                 }
             }
         }
+        $this->fg_list = $this->Raw_material->fg_list(array('store_id' => $this->store_id,'fg_id' => $fg_id));
+        redirect(BASE_URL . 'fg-list', 'refresh');
     }
+        
     public function get_bom_items()
     {
         $bom_type = $this->input->post('bom_type');
@@ -899,6 +933,33 @@ class Raw_material extends CI_Controller
         }   
         redirect(BASE_URL . 'fg-alias/'.$product_alias_detail->fg_id, 'refresh');
     }
+    function delete_alias($product_alias_id){
+        $product_alias_detail = $this->Raw_material->fg_alias_list(array('product_alias_id'=>$product_alias_id,
+                                                                          'store_id' => $this->store_id,
+                                                                          'result_type'=>$this->row_type
+                                                                        )
+                                                                    );
+        
+        if(!empty($product_alias_detail)){
+            $product_detail = $this->Raw_material->update_delete_alias(array('product_alias_id'=>$product_alias_id,
+                                                                       'store_id' => $this->store_id,
+                                                                       'is_deleted' => '1',
+                                                                       'created_by' => $this->user_id,
+                                                                       'result_type'=>$this->row_type
+                                                                      )
+                                                                );                
+            if($product_detail->action == 1){                
+                $this->session->set_flashdata('success_message', $product_detail->message);                
+            }else if($product_detail->action == 0){
+                $this->session->set_flashdata('error_message', $product_detail->message);
+            }else{
+                $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+            }         
+        }else{
+            $this->session->set_flashdata('error_message', "Some error occured. Please try after sometime.");
+        }   
+        redirect(BASE_URL . 'fg-alias-list', 'refresh');
+    }
     function bom_delete($fg_id)
     {
         $this->fg_id = $fg_id;
@@ -927,4 +988,10 @@ class Raw_material extends CI_Controller
         }
         redirect(BASE_URL . 'bom-list', 'refresh');
     }
+    function fg_alias_list(){
+        $this->data['fg_alias_list'] = $this->Raw_material->fg_alias_list(array('store_id' => $this->store_id));
+        // pr($this->data['fg_alias_list']);exit;
+    }
+
+    
 }

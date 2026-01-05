@@ -704,7 +704,7 @@ class Pick_list extends CI_Controller
         $fg_quantity = $this->input->post('fg_quantity');
         $get_fg_list = $this->Pick_list->get_fg_list(array('store_id' => $this->store_id, 'fg_id' => $fg_id));
         $get_count_rm = $this->Pick_list->get_count_rm(array('store_id' => $this->store_id, 'fg_id' => $fg_id));
-        // pr($get_fg_list); exit;
+
         $td = '';
         if (!empty($get_fg_list)) {
             $i = 1;
@@ -719,41 +719,58 @@ class Pick_list extends CI_Controller
                     $grn_type_id = 'sfg_id_' . $obj->item_id;
                 }
                 $location_name = $obj->location_names;
-                // pr($location_name);
+
                 $location = [];
-            if (!empty($location_name)) {
-                $array = explode(',', $location_name);
-                $vals = array_flip(array_count_values($array));
-                foreach ($vals as $key => $v) {
-                    $location[] = $v . ' - <b>' . $key . ' Box</b>';
+                if (!empty($location_name)) {
+                    // Split the location by commas, and process each location
+                    $array = explode(',', $location_name);
+
+                    foreach ($array as $loc) {
+                        // Trim any leading or trailing spaces
+                        $loc = trim($loc);
+
+                        // Extract box count and location using regular expression
+                        preg_match('/(.*)\s*-\s*(\d+)\s*Box/i', $loc, $matches);
+
+                        if (isset($matches[1]) && isset($matches[2])) {
+                            // Location part (before the '-')
+                            $location_part = trim($matches[1]);
+
+                            // Box count part (after the '-')
+                            $box_count = $matches[2];
+
+                            // Append box count to the location
+                            $location[] = $location_part . ' - ' . $box_count . ' Box' . ($box_count > 1 ? 's' : '');
+                        } else {
+                            // If no match for box count, just show the location
+                            $location[] = $loc;
+                        }
+                    }
                 }
-            }
 
                 $scanned_qty_id = $grn_type . '_scanned_qty_id_' . $obj->item_id;
                 $no_of_rm = !empty($get_count_rm[0]->no_of_rm) ? $get_count_rm[0]->no_of_rm : 0;
 
                 $td .= '<tr>
-                    <td>' . $i . '</td>
-                    <td>' . $obj->fg_code . '</td>
-                    <td>' . strtoupper($obj->grn_type) . '</td>
-                    <td>' . strtoupper($obj->item_name) . '</td>
-                    <td>' . $obj->quantity . '</td>
-                    <td>' . $total_quantity . '</td>
-                    <td class="scanned-qty">0</td> 
-                    <td>' . implode(', ', $location) . '</td>
-                    <input type="hidden" id="' . $grn_type_id . '" value="' . $total_quantity . '">
-                    <input type="hidden" class="fg-item-id" value="' . $obj->item_id . '">
-                    <input type="hidden" id="' . $scanned_qty_id . '" value="0">
-                    <input type="hidden" id="rm_count_id" value="' . $no_of_rm . '"> 
-
-                </tr>';
+                <td>' . $i . '</td>
+                <td>' . $obj->fg_code . '</td>
+                <td>' . strtoupper($obj->grn_type) . '</td>
+                <td>' . strtoupper($obj->item_name) . '</td>
+                <td>' . $obj->quantity . '</td>
+                <td>' . $total_quantity . '</td>
+                <td class="scanned-qty">0</td> 
+                <td>' . implode(', ', $location) . '</td>
+                <input type="hidden" id="' . $grn_type_id . '" value="' . $total_quantity . '">
+                <input type="hidden" class="fg-item-id" value="' . $obj->item_id . '">
+                <input type="hidden" id="' . $scanned_qty_id . '" value="0">
+                <input type="hidden" id="rm_count_id" value="' . $no_of_rm . '"> 
+            </tr>';
                 $i++;
             }
         }
 
         echo $td;
     }
-
 
     public function get_gi_box_detail()
     {
@@ -981,18 +998,18 @@ class Pick_list extends CI_Controller
             'general_issue_id' => $general_issue_id
         ));
     }
-    function general_issues_detail(){
+    function general_issues_detail()
+    {
         if (isset($this->general_issue_id) && $this->general_issue_id != '') {
             $this->data['fg_detail'] = $this->Pick_list->get_fg_details_by_issue(array('store_id' => $this->store_id, 'general_issues_id' => $this->general_issue_id));
             // pr($this->data['fg_detail']);exit;
         }
-        
     }
-    function dispatch_detail(){
+    function dispatch_detail()
+    {
         if (isset($this->general_issue_id) && $this->general_issue_id != '') {
             $this->data['fg_detail'] = $this->Pick_list->get_fg_details_by_issue(array('store_id' => $this->store_id, 'general_issues_id' => $this->general_issue_id));
             // pr($this->data['fg_detail']);exit;
         }
-        
     }
 }

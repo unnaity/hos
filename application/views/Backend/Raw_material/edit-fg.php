@@ -2,7 +2,7 @@
 <div class="modal" id="edit-fg">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content modal-content-demo">
-			<form action="<?php echo BASE_URL . 'fg-list' ?>" method="POST" id="edit-fg" data-parsley-validate="">
+			<form action="<?php echo BASE_URL . 'edit-fg' ?>" method="POST" id="edit-fg" data-parsley-validate="">
 				<div class="modal-header">
 					<h6 class="modal-title">Edit FG</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
 				</div>
@@ -23,10 +23,11 @@
 							<label class="form-label">Min Order Qty: <span class="tx-danger">*</span></label>
 						</div>
 						<div class="col-md-8 mg-t-5 mg-md-t-0">
-							<select class="form-control" name="sales_edit_qty" required id="sales_edit_qty">
+							<select class="form-control" name="fg_sales_qty" required id="fg_sales_qty">
 								<option value="">Select min qty</option>
-								<option value="1">Single</option>
+								<option value="1">Pcs</option>
 								<option value="2">Pair</option>
+								<option value="3">Set</option>
 							</select>
 						</div>
 					</div>

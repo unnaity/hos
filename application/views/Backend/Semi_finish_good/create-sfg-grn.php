@@ -32,8 +32,7 @@
 											<label class="form-label">Material Type: <span class="tx-danger">*</span></label>
 											<select class="form-control select2" name="grn_type" id="grn_type">
 												<option value="">Select Material Type</option>
-												<option value="fg">FG</option>
-												<option value="sfg">SFG</option>
+												
 												<option value="rm">RM</option>
 											</select>
 										</div>

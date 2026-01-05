@@ -43,11 +43,12 @@
 													</td>
 													<td>
 														<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit FG" onclick="show_fg_edit_popup(
-															'<?php echo $obj->fg_id ?>',
-															'<?php echo htmlspecialchars($obj->fg_discription); ?>',
-															'<?php echo htmlspecialchars($obj->fg_code); ?>',
-															'<?php echo $obj->sales_qty ?>'
-														)"><i class="fe fe-edit"></i></a>
+																'<?php echo $obj->fg_id ?>',
+																'<?php echo htmlspecialchars($obj->fg_code); ?>',
+																'<?php echo $obj->sales_qty ?>',
+																'<?php echo htmlspecialchars($obj->fg_discription); ?>'
+															)">
+															<i class="fe fe-edit"></i></a>
 
 														<button id="bDel" type="button" onclick="confirm_modal('<?php echo BASE_URL . 'fg-delete/' . $obj->fg_id ?>');" class="btn btn-sm btn-danger" title="Delete">
 															<i class="fe fe-trash-2"> </i>
@@ -71,11 +72,15 @@
 </div>
 <!-- End Main Content-->
 <?php $this->load->view('Backend/Raw_material/add-fg'); ?>
+<?php $this->load->view('Backend/Raw_material/edit-fg'); ?>
 
 <?php if (validation_errors() || $this->session->flashdata('error_message')) { ?>
 	<script type="text/javascript">
 		$(window).on('load', function() {
 			$('#add-fg').modal('show');
+		});
+		$(window).on('load', function() {
+			$('#edit-fg').modal('show');
 		});
 	</script>
 <?php } ?>
